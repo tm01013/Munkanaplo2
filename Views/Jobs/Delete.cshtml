@@ -1,0 +1,89 @@
+@model Munkanaplo2.Models.JobModel
+
+@{
+    ViewData["Title"] = "Törlés";
+
+    string canDelete = Model.JobCreator == Model.JobOwner ? Model.JobCreator : Model.JobOwner + " és " + Model.JobCreator;
+}
+
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+
+<h1>Feladat törlése</h1>
+@if (SignInManager.IsSignedIn(User))
+ {
+    <h3>Biztosan törlöd a feladatot???</h3>
+    <div>
+        <h4>JobModel</h4>
+        <hr />
+        <dl class="row">
+            <dt class="col-sm-2">
+                Cím
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.JobTitle)
+            </dd>
+
+            <dt class="col-sm-2">
+                Feladatleírás
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.JobDescription)
+            </dd>
+
+            <dt class="col-sm-2">
+                Tulajdonos
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.JobOwner)
+            </dd>
+
+            <dt class="col-sm-2">
+                Státusz
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.JobStatus)
+            </dd>
+
+            <dt class="col-sm-2">
+                Létrehozó
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.JobCreator)
+            </dd>
+
+            <dt class="col-sm-2">
+                Létrehozás dátuma
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.CreationDate)
+            </dd>
+            @if (Model.JobStatus != "folyamatban")
+             {
+                <dt class="col-sm-2">
+                    Befelyezés dátuma
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.FinishDate)
+                </dd>
+             }
+
+        </dl>
+
+        <form asp-action="Delete">
+            <input type="hidden" asp-for="Id" />
+            <input type="submit" value="Törlés" class="btn btn-danger" /> |
+            <a type="button" class="btn btn-primary" asp-action="Index">Vissza</a>
+        </form>
+    </div>
+ }
+@if(SignInManager.IsSignedIn(User) && User.Identity?.Name != Model.JobOwner && User.Identity?.Name != Model.JobCreator)
+{
+    <br />
+    <br />
+    <h3>Ezt a feladatot nem törölheted!</h3>
+    <h4>Ezt a feladatot csak @canDelete törölheti.</h4>
+    <br />
+    <a type="button" class="btn btn-primary" asp-action="Index">Vissza</a>
+}

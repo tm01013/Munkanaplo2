@@ -1,0 +1,74 @@
+@model Munkanaplo2.Models.JobModel
+
+@{
+    ViewData["Title"] = "Feladat létrehozása";
+}
+
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+
+
+@if (SignInManager.IsSignedIn(User))
+{
+    <h1>Új feladat kiosztása</h1>
+
+    <hr />
+    <div class="row">
+        <div class="col-md-4">
+            <form asp-action="Create">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group">
+                    <label asp-for="JobTitle" class="control-label">Cím</label>
+                    <input asp-for="JobTitle" class="form-control" />
+                    <span asp-validation-for="JobTitle" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="JobDescription" class="control-label">Feladatleírás</label>
+                    <textarea asp-for="JobDescription" class="form-control" cols="50" rows="4"></textarea>
+                    <span asp-validation-for="JobDescription" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="JobOwner" class="control-label">Tulajdonos</label>
+                    <select id="drpUserList" class="form-control" asp-for="JobOwner" asp-items="@ViewBag.Users"></select>
+                    <input type="hidden" asp-for="JobOwner" />
+                    <span asp-validation-for="JobOwner" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <input type="hidden" asp-for="JobCreator" class="form-control" value="@User.Identity?.Name.ToString()" />
+                    <span asp-validation-for="JobCreator" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <input type="hidden" asp-for="CreationDate" class="form-control" value="@DateTime.Now.ToString("yyyy/MM/dd H:mm")" />
+                    <span asp-validation-for="CreationDate" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <input type="hidden" asp-for="JobStatus" class="form-control" value="folyamatban" />
+                    <span asp-validation-for="JobStatus" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <input type="hidden" asp-for="FinishDate" class="form-control" value="0" />
+                    <span asp-validation-for="FinishDate" class="text-danger"></span>
+                </div>
+                <br />
+                <div class="form-group">
+                    <input type="submit" value="Létrehozás" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
+    </div>
+ }
+ <br>
+ <div>
+     <a type="button" class="btn btn-primary" asp-action="Index">Vissza</a>
+ </div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+ }

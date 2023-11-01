@@ -1,0 +1,115 @@
+@model Munkanaplo2.Models.JobModel
+
+@{
+    ViewData["Title"] = Model.JobTitle;
+}
+
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+
+<h1>Részletek</h1>
+
+<div>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            Cím
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.JobTitle)
+        </dd>
+
+        <dt class="col-sm-2">
+            Feladatleírás
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.JobDescription)
+        </dd>
+
+        <dt class="col-sm-2">
+            Tulajdonos
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.JobOwner)
+        </dd>
+
+        <dt class="col-sm-2">
+            Státusz
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.JobStatus)
+        </dd>
+
+        <dt class="col-sm-2">
+            Létrehozó
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.JobCreator)
+        </dd>
+
+        <dt class="col-sm-2">
+            Létrehozás dátuma
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.CreationDate)
+        </dd>
+        @if (Model.JobStatus != "folyamatban")
+        {
+            <dt class="col-sm-2">
+                Befelyezés dátuma
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.FinishDate)
+            </dd>
+        }
+
+    </dl>
+</div>
+<div>
+    @if (SignInManager.IsSignedIn(User) && (User.Identity?.Name == Model.JobOwner || User.Identity?.Name == Model.JobCreator))
+    {
+        <form asp-action="EditConfirmed">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" value="@Model.Id"/>
+                <div class="form-group">
+                    <input type="hidden" asp-for="JobTitle" class="form-control" value="@Model.JobTitle"/>
+                    <span asp-validation-for="JobTitle" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <input type="hidden" asp-for="JobDescription" class="form-control" value="@Model.JobDescription" ></input>
+                    <span asp-validation-for="JobDescription" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <input type="hidden" name="JobOwner" asp-for="JobOwner" value="@Model.JobOwner"/>
+                    <span asp-validation-for="JobOwner" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <input type="hidden" asp-for="JobCreator" class="form-control" value="@Model.JobCreator"/>
+                    <span asp-validation-for="JobCreator" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <input type="hidden" asp-for="CreationDate" class="form-control" value="@Model.CreationDate"/>
+                    <span asp-validation-for="CreationDate" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <input type="hidden" asp-for="JobStatus" class="form-control" value="Befejezve @User.Identity?.Name.ToString() által."/>
+                    <span asp-validation-for="JobStatus" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <input type="hidden" asp-for="FinishDate" class="form-control" value="@DateTime.Now.ToString("yyyy/MM/dd H:mm")"/>
+                    <span asp-validation-for="FinishDate" class="text-danger"></span>
+                </div>
+                <br />    
+                <div class="form-group">
+                    <input type="submit" value="KÉSZ" class="btn btn-primary" />
+                </div>
+        </form>
+        <br />
+    }
+    @if(User.Identity?.Name == Model.JobOwner || User.Identity?.Name == Model.JobCreator)
+    {
+        <a type="button" class="btn btn-primary" asp-action="Edit" asp-route-id="@Model?.Id">Szerkesztés</a> <a> | </a>
+    }
+    <a type="button" class="btn btn-primary" asp-action="Index">Vissza</a>
+</div>

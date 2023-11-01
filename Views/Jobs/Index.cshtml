@@ -1,0 +1,78 @@
+@model IEnumerable<Munkanaplo2.Models.JobModel>
+
+@{
+    ViewData["Title"] = "Feladatok";
+}
+
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+
+<h1>Feladatok</h1>
+
+<p>
+    <a asp-action="Create">Új feladat</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                <strong>Címe</strong>
+            </th>
+            <th>
+                <strong>Feladatleírás</strong>
+            </th>
+            <th>
+                <strong>Tulajdonos</strong>
+            </th>
+            <th>
+                <strong>Státusz</strong>
+            </th>
+            <th>
+                Létrehozó
+            </th>
+            <th>
+                Létrehozás dátuma
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.JobTitle)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.JobDescription)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.JobOwner)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.JobStatus)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.JobCreator)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CreationDate)
+            </td>
+            @if (SignInManager.IsSignedIn(User))
+            {
+                <td>
+                    @if(User.Identity?.Name == item.JobOwner || User.Identity?.Name == item.JobCreator)
+                    {
+                        <a asp-action="Edit" asp-route-id="@item.Id">Szerkesztés</a> <a> | </a>
+                    }
+                    <a type="button" class="btn btn-primary" asp-action="Details" asp-route-id="@item.Id">Részletek</a> 
+                    @if(User.Identity?.Name == item.JobOwner || User.Identity?.Name == item.JobCreator)
+                    {
+                        <a> | </a> <a asp-action="Delete" asp-route-id="@item.Id">Törlés</a>
+                    }
+                </td>
+            }
+        </tr>
+}
+    </tbody>
+</table>
