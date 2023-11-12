@@ -1,13 +1,15 @@
 ﻿@using Microsoft.AspNetCore.Identity
+@using Munkanaplo2.Models;
 @inject SignInManager<IdentityUser> SignInManager
 @inject UserManager<IdentityUser> UserManager
+@inject Munkanaplo2.Services.IProjectService projectService
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Munkanaplo</title>
+    <title>@ViewData["Title"] - Munkanapló</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Munkanaplo.styles.css" asp-append-version="true" />
@@ -26,14 +28,42 @@
                         @if (SignInManager.IsSignedIn(User))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Jobs" asp-action="Index">Feladatok</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Projects" asp-action="Index">Projektek</a>
                             </li>
                         }
                         else
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Jobs" asp-action="TeacherView">Munkanapló megtekintése tanárként</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Projects" asp-action="TeacherView">Munkanapló megtekintése tanárként</a>
                             </li>
+                        }
+                        @if(SignInManager.IsSignedIn(User))
+                        {  
+                            List<ProjectModel> allProjects = projectService.GetProjectsAsync();
+                            List<ProjectModel> projects = new List<ProjectModel>();
+                            if(allProjects != null)
+                            {
+                                foreach(ProjectModel projectModel in allProjects)
+                                {
+                                    List<ProjectMembership> allMemberships = projectModel.ProjectMembers?.ToList();
+                                    if(allMemberships != null)
+                                    {
+                                        bool isImIn = false;
+                                        foreach(ProjectMembership membership in allMemberships)
+                                        {
+                                            if(membership.Member == User?.Identity?.Name?.ToString()) isImIn = true;
+                                        }
+
+                                        if(isImIn) projects.Add(projectModel);
+                                        foreach(ProjectModel item in projects)
+                                        {
+                                            <li class="nav-item">
+                                                <a class="nav-link text-dark" asp-area="" asp-controller="Jobs" asp-route-id="@item.Id" asp-action="Index">@item.ProjectTitle</a>
+                                            </li>
+                                        }
+                                    }
+                                }
+                            }
                         }
                     </ul>
                     <partial name="_LoginPartial" />
@@ -46,6 +76,11 @@
             @RenderBody()
         </main>
     </div>
+    <footer class="fixed-bottom justify-content-between align-items-center py-3 my-4 border-top">
+        <div class="col-md-4 d-flex align-items-center">
+            <br><span class="text-muted">© Tatár Márton - @DateTime.Now.ToString("yyyy")</span>
+        </div>
+    </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

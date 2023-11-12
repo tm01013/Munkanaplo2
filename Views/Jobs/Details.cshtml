@@ -69,7 +69,7 @@
 <div>
     @if (SignInManager.IsSignedIn(User) && (User.Identity?.Name == Model.JobOwner || User.Identity?.Name == Model.JobCreator))
     {
-        <form asp-action="EditConfirmed">
+        <form asp-controller="Jobs" asp-action="EditConfirmed">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <input type="hidden" asp-for="Id" value="@Model.Id"/>
                 <div class="form-group">
@@ -100,6 +100,10 @@
                     <input type="hidden" asp-for="FinishDate" class="form-control" value="@DateTime.Now.ToString("yyyy/MM/dd H:mm")"/>
                     <span asp-validation-for="FinishDate" class="text-danger"></span>
                 </div>
+                <div class="form-group">
+                    <input type="hidden" asp-for="ProjectId" class="form-control" value="@ViewBag.ProjectId" />
+                    <span asp-validation-for="ProjectId" class="text-danger"></span>
+                </div>
                 <br />    
                 <div class="form-group">
                     <input type="submit" value="KÉSZ" class="btn btn-primary" />
@@ -107,9 +111,17 @@
         </form>
         <br />
     }
-    @if(User.Identity?.Name == Model.JobOwner || User.Identity?.Name == Model.JobCreator)
+    @if(SignInManager.IsSignedIn(User) && (User.Identity?.Name == Model.JobOwner || User.Identity?.Name == Model.JobCreator))
     {
-        <a type="button" class="btn btn-primary" asp-action="Edit" asp-route-id="@Model?.Id">Szerkesztés</a> <a> | </a>
+        <a type="button" class="btn btn-primary" asp-controller="Jobs" asp-action="Edit" asp-route-id="@Model?.Id">Szerkesztés</a> <a> | </a>
+        <a type="button" class="btn btn-primary" asp-controller="Jobs" asp-route-id="@Model.ProjectId" asp-action="Index">Vissza</a>
     }
-    <a type="button" class="btn btn-primary" asp-action="Index">Vissza</a>
+    else if(!SignInManager.IsSignedIn(User))
+    {
+        <a type="button" class="btn btn-primary" asp-controller="Jobs" asp-route-id="@Model.ProjectId" asp-action="TeacherView">Vissza</a>
+    }
+    else
+    {
+        <a type="button" class="btn btn-primary" asp-controller="Jobs" asp-route-id="@Model.ProjectId" asp-action="Index">Vissza</a>       
+    }
 </div>

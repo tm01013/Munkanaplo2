@@ -15,7 +15,6 @@
  {
     <h3>Biztosan törlöd a feladatot???</h3>
     <div>
-        <h4>JobModel</h4>
         <hr />
         <dl class="row">
             <dt class="col-sm-2">
@@ -71,10 +70,10 @@
 
         </dl>
 
-        <form asp-action="Delete">
-            <input type="hidden" asp-for="Id" />
-            <input type="submit" value="Törlés" class="btn btn-danger" /> |
-            <a type="button" class="btn btn-primary" asp-action="Index">Vissza</a>
+        <form method="post" asp-controller="Jobs" asp-action="DeleteConfirmed">
+            <input type="hidden" name="Id" value="@Model.Id"></input>
+            <input type="submit" value="Törlés" class="btn btn-danger"></input><a> | </a>
+            <a type="button" class="btn btn-primary" asp-controller="Jobs" asp-route-id="@Model.ProjectId" asp-action="Index">Vissza</a>
         </form>
     </div>
  }
@@ -82,7 +81,7 @@
 {
     <br />
     <br />
-    <h3>Ezt a feladatot nem törölheted!</h3>
+    <h3>Hiba!</h3>
     <h4>Ezt a feladatot csak @canDelete törölheti.</h4>
     <br />
     <a type="button" class="btn btn-primary" asp-action="Index">Vissza</a>

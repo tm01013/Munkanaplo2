@@ -10,9 +10,7 @@
 
 <h1>Feladatok</h1>
 
-<p>
-    <a asp-action="Create">Új feladat</a>
-</p>
+<br>
 <table class="table">
     <thead>
         <tr>
@@ -59,7 +57,7 @@
                 @Html.DisplayFor(modelItem => item.CreationDate)
             </td>
             <td>
-                <a type="button" class="btn btn-primary" asp-action="Details" asp-route-id="@item.Id">Részletek</a> 
+                <a type="button" class="btn btn-primary" asp-controller="Jobs" asp-action="Details" asp-route-id="@item.Id">Részletek</a> 
             </td>
         </tr>
 }

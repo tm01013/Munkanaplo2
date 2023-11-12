@@ -10,9 +10,12 @@
 
 <h1>Feladatok</h1>
 
-<p>
-    <a asp-action="Create">Új feladat</a>
-</p>
+
+<form class="form-inline" asp-controller="Jobs" asp-action="Create">
+    <input type="hidden" name="Id" value="@ViewBag.ProjectId"></input>
+    <input type="submit" value="Új feladat" class="btn btn-primary"></input>
+</form>
+<br>
 <table class="table">
     <thead>
         <tr>
@@ -63,12 +66,12 @@
                 <td>
                     @if(User.Identity?.Name == item.JobOwner || User.Identity?.Name == item.JobCreator)
                     {
-                        <a asp-action="Edit" asp-route-id="@item.Id">Szerkesztés</a> <a> | </a>
+                        <a asp-controller="Jobs" asp-action="Edit" asp-route-id="@item.Id">Szerkesztés</a> <a> | </a>
                     }
-                    <a type="button" class="btn btn-primary" asp-action="Details" asp-route-id="@item.Id">Részletek</a> 
+                    <a type="button" class="btn btn-primary" asp-controller="Jobs" asp-action="Details" asp-route-id="@item.Id">Részletek</a> 
                     @if(User.Identity?.Name == item.JobOwner || User.Identity?.Name == item.JobCreator)
                     {
-                        <a> | </a> <a asp-action="Delete" asp-route-id="@item.Id">Törlés</a>
+                        <a> | </a> <a asp-controller="Jobs" asp-action="Delete" asp-route-id="@item.Id">Törlés</a>
                     }
                 </td>
             }

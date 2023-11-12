@@ -16,7 +16,7 @@
     <hr />
     <div class="row">
         <div class="col-md-4">
-            <form asp-action="EditConfirmed">
+            <form asp-controller="Jobs" asp-action="EditConfirmed">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <input type="hidden" asp-for="Id" />
 
@@ -54,6 +54,10 @@
                     <input type="hidden" asp-for="FinishDate" class="form-control" value="@Model.FinishDate"/>
                     <span asp-validation-for="FinishDate" class="text-danger"></span>
                 </div>
+                <div class="form-group">
+                    <input type="hidden" asp-for="ProjectId" class="form-control" value="@ViewBag.ProjectId" />
+                    <span asp-validation-for="ProjectId" class="text-danger"></span>
+                </div>
                 <br />
                 <div class="form-group">
                     <input type="submit" value="Mentés" class="btn btn-primary" />
@@ -63,17 +67,17 @@
     </div>
     <br>
  <div>
-     <a type="button" class="btn btn-primary" asp-action="Index">Vissza</a>
+     <a type="button" class="btn btn-primary" asp-controller="Jobs" asp-route-id="@Model.ProjectId" asp-action="Index">Vissza</a>
  </div>
 }
 @if(SignInManager.IsSignedIn(User) && User.Identity?.Name != Model.JobOwner && User.Identity?.Name != Model.JobCreator)
 {
     <br />
     <br />
-    <h3>Ezt a feladatot nem szerkesztheted!</h3>
+    <h3>Hiba!</h3>
     <h4>Ezt a feladatot csak @canEdit szerkesztheti.</h4>
     <br />
-    <a type="button" class="btn btn-primary" asp-action="Index">Vissza</a>
+    <a type="button" class="btn btn-primary" asp-controller="Jobs" asp-route-id="@Model.ProjectId" asp-action="Index">Vissza</a>
 }
 
 @section Scripts {

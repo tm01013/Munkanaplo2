@@ -18,21 +18,28 @@ namespace Munkanaplo2.Controllers
         public JobsController(ApplicationDbContext context)
         {
             _context = context;
+            ProjectsController.ShowIndex += OnShowIndexReceved;
         }
 
         // GET: Jobs
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index([Bind("Id")]int Id)
         {
-            return _context.JobModel != null ?
-                        View(await _context.JobModel.ToListAsync()) :
-                        Problem("Entity set 'ApplicationDbContext.JobModel'  is null.");
+            if(TempData.ContainsKey("ProjectId"))
+            {
+                ViewBag.ProjectId = TempData["ProjectId"];
+                return View("Index", await _context.JobModel.Where(jm => jm.ProjectId == int.Parse(TempData["ProjectId"].ToString())).ToListAsync());
+            }
+            else
+            {
+            ViewBag.ProjectId = Id;
+            return View("Index", await _context.JobModel.Where(jm => jm.ProjectId == Id).ToListAsync());
+            }
         }
 
-        public async Task<IActionResult> TeacherView()
+        public async Task<IActionResult> TeacherView([Bind("Id")]int Id)
         {
-            return _context.JobModel != null ?
-                        View(await _context.JobModel.ToListAsync()) :
-                        Problem("Entity set 'ApplicationDbContext.JobModel'  is null.");
+            ViewBag.ProjectId = Id;
+            return View( await _context.JobModel.Where(jm => jm.ProjectId == Id).ToListAsync());
         }
 
         // GET: Jobs/Details/5
@@ -45,6 +52,9 @@ namespace Munkanaplo2.Controllers
 
             var jobModel = await _context.JobModel
                 .FirstOrDefaultAsync(m => m.Id == id);
+#pragma warning disable 8602        
+            ViewBag.ProjectId = jobModel.ProjectId;
+#pragma warning restore 8602
             if (jobModel == null)
             {
                 return NotFound();
@@ -55,10 +65,11 @@ namespace Munkanaplo2.Controllers
 
         // GET: Jobs/Create
         [Authorize]
-        public async Task<IActionResult> Create()
+        public async Task<IActionResult> Create([Bind("Id")]int Id)
         {
             var users = await _context.Users.ToListAsync();
             ViewBag.Users = new SelectList(users);
+            ViewBag.ProjectId = Id;
             return View();
         }
 
@@ -68,13 +79,15 @@ namespace Munkanaplo2.Controllers
         [HttpPost()]
         [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,JobTitle,JobDescription,JobOwner,JobCreator,CreationDate,JobStatus,FinishDate")] JobModel jobModel)
+        public async Task<IActionResult> CreateConfirmed([Bind("Id,JobTitle,JobDescription,JobOwner,JobCreator,CreationDate,JobStatus,FinishDate,ProjectId")] JobModel jobModel)
         {
             if (ModelState.IsValid)
             {
                 _context.Add(jobModel);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+
+                ViewBag.ProjectId = jobModel.ProjectId;
+                return View("Index", await _context.JobModel.Where(jm => jm.ProjectId == jobModel.ProjectId).ToListAsync());
             }
             return View(jobModel);
         }
@@ -95,6 +108,7 @@ namespace Munkanaplo2.Controllers
             }
             var users = await _context.Users.ToListAsync();
             ViewBag.Users = new SelectList(users);
+            ViewBag.ProjectId = jobModel.ProjectId;
             return View(jobModel);
         }
 
@@ -104,7 +118,7 @@ namespace Munkanaplo2.Controllers
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditConfirmed(int id, [Bind("Id,JobTitle,JobDescription,JobOwner,JobCreator,CreationDate,JobStatus,FinishDate")] JobModel jobModel)
+        public async Task<IActionResult> EditConfirmed(int id, [Bind("Id,JobTitle,JobDescription,JobOwner,JobCreator,CreationDate,JobStatus,FinishDate,ProjectId")] JobModel jobModel)
         {
             if (id != jobModel.Id)
             {
@@ -129,7 +143,8 @@ namespace Munkanaplo2.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                TempData["ProjectId"] = jobModel.ProjectId;
+                return RedirectToAction("Index");
             }
             return View(jobModel);
         }
@@ -155,9 +170,9 @@ namespace Munkanaplo2.Controllers
 
         // POST: Jobs/Delete/5
         [Authorize]
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed([Bind("Id")]int id)
         {
             if (_context.JobModel == null)
             {
@@ -170,7 +185,21 @@ namespace Munkanaplo2.Controllers
             }
             
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+
+            TempData["ProjectId"] = jobModel.ProjectId;
+            return RedirectToAction("Index");
+        }
+
+        public void OnShowIndexReceved(int projectId, bool isShowTeacher)
+        {
+            if(!isShowTeacher)
+            {
+                Index(projectId);
+            }
+            else
+            {
+                TeacherView(projectId);
+            }
         }
 
         private bool JobModelExists(int id)
