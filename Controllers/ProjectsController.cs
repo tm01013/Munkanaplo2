@@ -34,7 +34,7 @@ namespace Munkanaplo2.Controllers
                         Problem("Entity set 'ApplicationDbContext.ProjectModel'  is null.");
         }
 
-    public async Task<IActionResult> TeacherView()
+        public async Task<IActionResult> TeacherView()
         {
             var projectMemberships = _context.ProjectMemberships.ToList();
             ViewBag.ProjectMemberships = projectMemberships;
@@ -85,37 +85,37 @@ namespace Munkanaplo2.Controllers
         {
             //if (ModelState.IsValid)
             //{
-                ProjectModel inputModel = ProjectModel;
-                int projectId = 1;
-                if (_context.ProjectModel.Any())
-                {
-                    projectId = _context.ProjectModel.Max(p => p.Id) + 1;
-                }
-                inputModel.Id = projectId;
+            ProjectModel inputModel = ProjectModel;
+            int projectId = 1;
+            if (_context.ProjectModel.Any())
+            {
+                projectId = _context.ProjectModel.Max(p => p.Id) + 1;
+            }
+            inputModel.Id = projectId;
 
-                var projectMemberships = new List<ProjectMembership>();
-                var projectMembership = new ProjectMembership 
-                {
-                    ProjectId = projectId,
-                    Member = ProjectModel.ProjectCreator,
-                    Project = inputModel
-                };
-                projectMemberships.Add(projectMembership);
+            var projectMemberships = new List<ProjectMembership>();
+            var projectMembership = new ProjectMembership
+            {
+                ProjectId = projectId,
+                Member = ProjectModel.ProjectCreator,
+                Project = inputModel
+            };
+            projectMemberships.Add(projectMembership);
 
-                inputModel.ProjectMembers = projectMemberships;
+            inputModel.ProjectMembers = projectMemberships;
 
 
-                var projectModelToAdd = new ProjectModel 
-                {
-                    Id = inputModel.Id,
-                    ProjectTitle = inputModel.ProjectTitle,
-                    ProjectCreator = inputModel.ProjectCreator,
-                    ProjectMembers = inputModel.ProjectMembers
-                };
+            var projectModelToAdd = new ProjectModel
+            {
+                Id = inputModel.Id,
+                ProjectTitle = inputModel.ProjectTitle,
+                ProjectCreator = inputModel.ProjectCreator,
+                ProjectMembers = inputModel.ProjectMembers
+            };
 
-                _context.Add(projectModelToAdd);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+            _context.Add(projectModelToAdd);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
             //}
             return View(ProjectModel);
         }
@@ -159,7 +159,7 @@ namespace Munkanaplo2.Controllers
                     .Where(pm => pm.ProjectId == ProjectModel.Id)
                     .ToList();
 
-                var projectModelToAdd = new ProjectModel 
+                var projectModelToAdd = new ProjectModel
                 {
                     Id = id,
                     ProjectTitle = ProjectModel.ProjectTitle,
@@ -205,14 +205,14 @@ namespace Munkanaplo2.Controllers
                     .Where(pm => pm.ProjectId == ProjectModel.Id)
                     .ToList();
 
-                var projectMembershipToRemove = new ProjectMembership 
+                var projectMembershipToRemove = new ProjectMembership
                 {
                     ProjectId = ProjectModel.Id,
                     Member = projectMembersToRemove
                 };
                 projectMemberships.Remove(projectMembershipToRemove);
 
-                var projectModelToRemove = new ProjectModel 
+                var projectModelToRemove = new ProjectModel
                 {
                     Id = id,
                     ProjectTitle = ProjectModel.ProjectTitle,
@@ -226,7 +226,7 @@ namespace Munkanaplo2.Controllers
                 try
                 {
                     _context.Update(projectModelToRemove);
-                    if(projectMembersToRemove != null) _context.Remove(projectMemberToRemove);
+                    if (projectMembersToRemove != null) _context.Remove(projectMemberToRemove);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -263,14 +263,14 @@ namespace Munkanaplo2.Controllers
                     .ToList();
 
 
-                var projectMembershipToAdd = new ProjectMembership 
+                var projectMembershipToAdd = new ProjectMembership
                 {
                     ProjectId = ProjectModel.Id,
                     Member = projectMembersToAdd
                 };
                 projectMemberships.Add(projectMembershipToAdd);
 
-                var projectModelToAdd = new ProjectModel 
+                var projectModelToAdd = new ProjectModel
                 {
                     Id = id,
                     ProjectTitle = ProjectModel.ProjectTitle,
@@ -338,27 +338,42 @@ namespace Munkanaplo2.Controllers
                     .Where(pm => pm.ProjectId == id)
                     .ToList();
             var jobs = _context.JobModel.Where(jm => jm.ProjectId == id).ToList();
+
             var ProjectModel = await _context.ProjectModel.FindAsync(id);
+
+            List<SubTaskModel> subTasks = new List<SubTaskModel>();
+            foreach (var job in jobs)
+            {
+                foreach (var subTask in _context.SubTaskModel.Where(stm => stm.JobId == job.Id))
+                {
+                    subTasks.Add(subTask);
+                }
+            }
+
             if (ProjectModel != null)
             {
-                foreach(ProjectMembership membership in projectMemberships)
+                foreach (ProjectMembership membership in projectMemberships)
                 {
                     _context.Remove(membership);
                 }
-                foreach(JobModel job in jobs)
+                foreach (JobModel job in jobs)
                 {
                     _context.Remove(job);
                 }
+                foreach (SubTaskModel subTask in subTasks)
+                {
+                    _context.Remove(subTask);
+                }
                 _context.ProjectModel.Remove(ProjectModel);
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool ProjectModelExists(int id)
         {
-          return (_context.ProjectModel?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (_context.ProjectModel?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }
