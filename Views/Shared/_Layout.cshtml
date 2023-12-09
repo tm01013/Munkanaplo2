@@ -23,9 +23,17 @@
 </head>
 
 <script>
-    document.querySelectorAll(".text-dark").forEach((element) => {
-        element.className = element.className.replace(/text-dark/g, "text-light");
-    });
+    let isSelected = localStorage.getItem("lightSwitch") !== null && localStorage.getItem("lightSwitch") === "dark";
+    if (isSelected) {
+        document.querySelectorAll(".bootstrap").forEach((element) => {
+            element.className = element.className.replace(/bootstrap/g, "bootstrap-dark");
+        }
+        );
+        document.querySelectorAll(".text-dark").forEach((element) => {
+            element.className = element.className.replace(/text-dark/g, "text-light");
+        });
+        lightSwitch.checked = true;
+    }
 </script>
 
 <body class="bootstrap-dark">
