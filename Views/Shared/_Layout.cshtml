@@ -58,14 +58,14 @@
                         @if (SignInManager.IsSignedIn(User))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Projects"
+                                <a class="nav-link text-light" asp-area="" asp-controller="Projects"
                                     asp-action="Index">Projektek</a>
                             </li>
                         }
                         else
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Projects"
+                                <a class="nav-link text-light" asp-area="" asp-controller="Projects"
                                     asp-action="TeacherView">Munkanapló megtekintése tanárként</a>
                             </li>
                         }
@@ -90,7 +90,7 @@
                                         foreach (ProjectModel item in projects)
                                         {
                                             <li class="nav-item">
-                                                <a class="nav-link text-dark" asp-area="" asp-controller="Jobs" asp-route-id="@item.Id"
+                                                <a class="nav-link text-light" asp-area="" asp-controller="Jobs" asp-route-id="@item.Id"
                                                     asp-action="Index">@item.ProjectTitle</a>
                                             </li>
                                         }
