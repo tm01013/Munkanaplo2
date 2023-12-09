@@ -11,14 +11,14 @@ using Munkanaplo2.Data;
 namespace Munkanaplo2.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20231101060909_initialsetup")]
-    partial class initialsetup
+    [Migration("20231201053519_subtaskDb")]
+    partial class subtaskDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "7.0.12");
+            modelBuilder.HasAnnotation("ProductVersion", "7.0.13");
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -250,9 +250,81 @@ namespace Munkanaplo2.Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.ToTable("JobModel");
+                });
+
+            modelBuilder.Entity("Munkanaplo2.Models.ProjectMembership", b =>
+                {
+                    b.Property<int>("ProjectMembershipId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Member")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("ProjectMembershipId");
+
+                    b.HasIndex("ProjectId");
+
+                    b.ToTable("ProjectMemberships");
+                });
+
+            modelBuilder.Entity("Munkanaplo2.Models.ProjectModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ProjectCreator")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ProjectTitle")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ProjectModel");
+                });
+
+            modelBuilder.Entity("Munkanaplo2.Models.SubTaskModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("JobId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("TaskCreationDate")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TaskCreator")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TaskDetails")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TaskTitle")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SubTaskModel");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -304,6 +376,22 @@ namespace Munkanaplo2.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Munkanaplo2.Models.ProjectMembership", b =>
+                {
+                    b.HasOne("Munkanaplo2.Models.ProjectModel", "Project")
+                        .WithMany("ProjectMembers")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("Munkanaplo2.Models.ProjectModel", b =>
+                {
+                    b.Navigation("ProjectMembers");
                 });
 #pragma warning restore 612, 618
         }

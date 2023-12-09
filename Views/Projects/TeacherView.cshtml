@@ -1,0 +1,48 @@
+@model IEnumerable<Munkanaplo2.Models.ProjectModel>
+
+@{
+    ViewData["Title"] = "Projektek";
+}
+
+<h1>Projektek</h1>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                <strong>Címe</strong>
+            </th>
+            <th>
+                <strong>Tulajdonos</strong>
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) 
+{
+    
+    List<string> memberNames = new List<string>();
+    foreach(ProjectMembership membership in item.ProjectMembers)
+    {
+        memberNames.Add(membership.Member);
+    }
+
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.ProjectTitle)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ProjectCreator)
+            </td>
+            <td>
+                <form class="form-inline" asp-controller="Jobs" asp-action="TeacherView">
+                    <input type="hidden" name="Id" value="@item.Id"/>
+                    <a type="button" class="btn btn-primary" asp-action="Details" asp-route-id="@item.Id">Részletek</a>
+                    <a> | </a>
+                    <input type="submit" value="Feladatok" class="btn btn-primary" />
+                </form>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

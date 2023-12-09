@@ -10,72 +10,154 @@
 @inject UserManager<IdentityUser> UserManager
 
 
-@if (SignInManager.IsSignedIn(User) && (User.Identity?.Name == Model.JobOwner || User.Identity?.Name == Model.JobCreator))
+
+@if (SignInManager.IsSignedIn(User) && (User.Identity?.Name == Model.JobOwner || User.Identity?.Name ==
+Model.JobCreator))
 {
     <h1>Szerkesztés</h1>
     <hr />
     <div class="row">
-        <div class="col-md-4">
-            <form asp-action="EditConfirmed">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <input type="hidden" asp-for="Id" />
+    <div class="col-md-4">
+        <form asp-controller="Jobs" asp-action="EditConfirmed">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
 
-                <div class="form-group">
-                    <label asp-for="JobTitle" class="control-label">Cím</label>
-                    <input asp-for="JobTitle" class="form-control" />
-                    <span asp-validation-for="JobTitle" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="JobDescription" class="control-label">Feladatleírás</label>
-                    <textarea asp-for="JobDescription" class="form-control" cols="50" rows="4"></textarea>
-                    <span asp-validation-for="JobDescription" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="JobOwner" class="control-label">Tulajdonos</label>
-                    <select id="drpUserList" class="form-control" asp-for="JobOwner" asp-items="@ViewBag.Users"></select>
-                    <input type="hidden" name="JobOwner" asp-for="JobOwner" />
-                    <span asp-validation-for="JobOwner" class="text-danger"></span>
-                </div>
+            <div class="form-group">
+                <label asp-for="JobTitle" class="control-label">Cím</label>
+                <input asp-for="JobTitle" class="form-control" />
+                <span asp-validation-for="JobTitle" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="JobDescription" class="control-label">Feladatleírás</label>
+                <textarea asp-for="JobDescription" class="form-control" cols="50" rows="4"></textarea>
+                <span asp-validation-for="JobDescription" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="JobOwner" class="control-label">Tulajdonos</label>
+                <select id="drpUserList" class="form-control" asp-for="JobOwner" asp-items="@ViewBag.Users"></select>
+                <input type="hidden" name="JobOwner" asp-for="JobOwner" />
+                <span asp-validation-for="JobOwner" class="text-danger"></span>
+            </div>
 
 
-                <div class="form-group">
-                    <input type="hidden" asp-for="JobCreator" class="form-control" value="@Model.JobCreator"/>
-                    <span asp-validation-for="JobCreator" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <input type="hidden" asp-for="CreationDate" class="form-control" value="@Model.CreationDate"/>
-                    <span asp-validation-for="CreationDate" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <input type="hidden" asp-for="JobStatus" class="form-control" value="@Model.JobStatus"/>
-                    <span asp-validation-for="JobStatus" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <input type="hidden" asp-for="FinishDate" class="form-control" value="@Model.FinishDate"/>
-                    <span asp-validation-for="FinishDate" class="text-danger"></span>
-                </div>
-                <br />
-                <div class="form-group">
-                    <input type="submit" value="Mentés" class="btn btn-primary" />
-                </div>
-            </form>
-        </div>
+            <div class="form-group">
+                <input type="hidden" asp-for="JobCreator" class="form-control" value="@Model.JobCreator" />
+                <span asp-validation-for="JobCreator" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="hidden" asp-for="CreationDate" class="form-control" value="@Model.CreationDate" />
+                <span asp-validation-for="CreationDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="hidden" asp-for="JobStatus" class="form-control" value="@Model.JobStatus" />
+                <span asp-validation-for="JobStatus" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="hidden" asp-for="FinishDate" class="form-control" value="@Model.FinishDate" />
+                <span asp-validation-for="FinishDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="hidden" asp-for="ProjectId" class="form-control" value="@ViewBag.ProjectId" />
+                <span asp-validation-for="ProjectId" class="text-danger"></span>
+            </div>
+            <br />
+            <div class="form-group">
+                <input type="submit" value="Mentés" class="btn btn-primary" />
+            </div>
+        </form>
     </div>
+</div>
     <br>
- <div>
-     <a type="button" class="btn btn-primary" asp-action="Index">Vissza</a>
- </div>
+    <table class="table">
+    <thead>
+        <tr>
+            <th class="w-1">
+            </th>
+            <th>
+                <strong>Alfeladatok</strong>
+            </th>
+            <th>
+            </th>
+            <th>
+            </th>
+            <th>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (ViewBag.SubTasks != null)
+            {
+                @foreach (var item in ViewBag.SubTasks)
+                {
+                    <tr>
+                        <td class="w-1">
+                            <strong>•</strong>
+                        </td>
+                        <td>
+                            <strong>@item.TaskTitle</strong>
+                        </td>
+                        <td>
+                            @item.TaskDetails
+                        </td>
+                        <td>
+                            <a class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#removeSubTask-@item.Id">Törlés</a>
+                        </td>
+                    </tr>
+
+                    <div class="modal fade" id="removeSubTask-@item.Id" tabindex="-1" aria-labelledby="removeSubTask-@item.Id"
+                        style="display: none;" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalCenterTitle">Alfeladat törlése</h5>
+                                    <button type="button" class="btn" data-bs-dismiss="modal"><strong>X</strong></button>
+                                </div>
+                                <div class="modal-body">
+                                    @if (SignInManager.IsSignedIn(User) && (User.Identity?.Name == Model.JobOwner ||
+                                   User.Identity?.Name ==
+                                   Model.JobCreator))
+                                    {
+                                        <form class="form-inline" asp-controller="Jobs" asp-action="DeleteSubTask">
+                                            <input type="hidden" name="Id" value="@item.Id"></input>
+                                            <p>Biztosan törölni szeretnéd ezt az alfeladatot?</p>
+                                            <br>
+                                            <div class="float-end">
+                                                <input type="submit" value="Törlés" class="btn btn-danger"></input>
+                                            </div>
+                                        </form>
+                                    }
+                                    else
+                                    {
+
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+
+        </tbody>
+    </table>
+    <br>
+    <div>
+    <a type="button" class="btn btn-primary" asp-controller="Jobs" asp-route-id="@Model.ProjectId"
+        asp-action="Index">Vissza</a>
+</div>
 }
-@if(SignInManager.IsSignedIn(User) && User.Identity?.Name != Model.JobOwner && User.Identity?.Name != Model.JobCreator)
+@if (SignInManager.IsSignedIn(User) && User.Identity?.Name != Model.JobOwner && User.Identity?.Name != Model.JobCreator)
 {
     <br />
     <br />
-    <h3>Ezt a feladatot nem szerkesztheted!</h3>
+    <h3>Hiba!</h3>
     <h4>Ezt a feladatot csak @canEdit szerkesztheti.</h4>
     <br />
-    <a type="button" class="btn btn-primary" asp-action="Index">Vissza</a>
+    <a type="button" class="btn btn-primary" asp-controller="Jobs" asp-route-id="@Model.ProjectId"
+    asp-action="Index">Vissza</a>
 }
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

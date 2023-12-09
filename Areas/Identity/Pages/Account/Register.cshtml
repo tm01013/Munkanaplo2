@@ -12,24 +12,55 @@
             <hr />
             <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
             <div class="form-floating mb-3">
-                <input asp-for="Input.UserName" class="form-control" autocomplete="username" aria-required="true" placeholder="móricka@gmail.com" />
+                <input asp-for="Input.UserName" class="form-control" autocomplete="username" aria-required="true"
+                    placeholder="móricka@gmail.com" />
                 <label asp-for="Input.UserName">Felhasználónév</label>
                 <span asp-validation-for="Input.UserName" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
-                <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
+                <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true"
+                    placeholder="password" />
                 <label asp-for="Input.Password">Jelszó</label>
                 <span asp-validation-for="Input.Password" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
-                <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="jelszó" />
+                <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password"
+                    aria-required="true" placeholder="jelszó" />
                 <label asp-for="Input.ConfirmPassword">Jelszó megerősítése</label>
                 <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
             </div>
-            <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Regisztráció</button>
+            <a class="w-100 btn btn-lg btn-primary" data-bs-toggle="modal"
+                data-bs-target="#acceptPrivacy">Regisztráció</a>
         </form>
     </div>
 </div>
+
+<div class="modal fade" id="acceptPrivacy" tabindex="-1" aria-labelledby="acceptPrivacy" style="display: none;"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalCenterTitle">Használati feltételek</h5>
+                <button type="button" class="btn" data-bs-dismiss="modal"><strong>X</strong></button>
+            </div>
+            <div class="modal-body">
+                <p>A regisztráláshoz el kel fogadnod a felhasználási feltételeket!</p>
+                <p>Elfogadod a <a asp-controller="Home" asp-action="Privacy">használati feltételeket</a>?</p>
+                <br>
+            </div>
+            <div class="modal-footer">
+                <div class="float-end">
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Elutasítás</button>
+                    <a> | </a>
+                    <button form="registerForm" id="registerSubmit" type="submit"
+                        class="btn btn-success">Elfogadás</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }

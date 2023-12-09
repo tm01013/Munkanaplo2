@@ -1,24 +1,48 @@
 ﻿@using Microsoft.AspNetCore.Identity
+@using Munkanaplo2.Models;
 @inject SignInManager<IdentityUser> SignInManager
 @inject UserManager<IdentityUser> UserManager
+@inject Munkanaplo2.Services.IProjectService projectService
 
 <!DOCTYPE html>
 <html lang="en">
+
+</html>
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Munkanaplo</title>
+    <title>@ViewData["Title"] - Munkanapló</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="~/css/toggle-bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/toggle-bootstrap-dark.min.css" />
+    <link rel="stylesheet" href="~/css/toggle-bootstrap-print.min.css" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Munkanaplo.styles.css" asp-append-version="true" />
 </head>
-<body>
+
+<script>
+    document.querySelectorAll(".text-dark").forEach((element) => {
+        element.className = element.className.replace(/text-dark/g, "text-light");
+    });
+</script>
+
+<body class="bootstrap-dark">
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-themed border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Munkanapló</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                <a class="navbar-brand me-3" asp-area="" asp-controller="Home" asp-action="Index">Munkanapló</a>
+
+                <div class="form-check form-switch my-auto mx-3"
+                    style="--bs-form-switch-width: 60px; --bs-form-switch-height: 30px;">
+                    <input class="form-check-input" type="checkbox" id="lightSwitch" checked />
+                    <label class="form-check-label ms-1" for="lightSwitch">
+                        <i class="bi bi-moon-stars-fill"></i>
+                    </label>
+                </div>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
+                    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
@@ -26,14 +50,45 @@
                         @if (SignInManager.IsSignedIn(User))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Jobs" asp-action="Index">Feladatok</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Projects"
+                                    asp-action="Index">Projektek</a>
                             </li>
                         }
                         else
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Jobs" asp-action="TeacherView">Munkanapló megtekintése tanárként</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Projects"
+                                    asp-action="TeacherView">Munkanapló megtekintése tanárként</a>
                             </li>
+                        }
+                        @if (SignInManager.IsSignedIn(User))
+                        {
+                            List<ProjectModel> allProjects = projectService.GetProjectsAsync();
+                            List<ProjectModel> projects = new List<ProjectModel>();
+                            if (allProjects != null)
+                            {
+                                foreach (ProjectModel projectModel in allProjects)
+                                {
+                                    List<ProjectMembership> allMemberships = projectModel.ProjectMembers?.ToList();
+                                    if (allMemberships != null)
+                                    {
+                                        bool isImIn = false;
+                                        foreach (ProjectMembership membership in allMemberships)
+                                        {
+                                            if (membership.Member == User?.Identity?.Name?.ToString()) isImIn = true;
+                                        }
+
+                                        if (isImIn) projects.Add(projectModel);
+                                        foreach (ProjectModel item in projects)
+                                        {
+                                            <li class="nav-item">
+                                                <a class="nav-link text-dark" asp-area="" asp-controller="Jobs" asp-route-id="@item.Id"
+                                                    asp-action="Index">@item.ProjectTitle</a>
+                                            </li>
+                                        }
+                                    }
+                                }
+                            }
                         }
                     </ul>
                     <partial name="_LoginPartial" />
@@ -46,10 +101,57 @@
             @RenderBody()
         </main>
     </div>
+    <footer class="fixed-bottom justify-content-between align-items-center py-3 my-4 border-top">
+        <div class="col-md-4 d-flex align-items-center">
+            <br><span class="text-muted">© Tatár Márton - @DateTime.Now.ToString("yyyy") - <a asp-controller="Home"
+                    asp-action="Privacy">Használati feltételek</a></span>
+        </div>
+    </footer>
+    <script>
+        (function () {
+            let lightSwitch = document.getElementById("lightSwitch");
+            if (lightSwitch) {
+                darkMode();
+                lightSwitch.addEventListener("change", () => {
+                    lightMode();
+                }
+                );
+                function darkMode() {
+                    let isSelected = localStorage.getItem("lightSwitch") !== null && localStorage.getItem("lightSwitch") === "dark";
+                    if (isSelected) {
+                        document.querySelectorAll(".bootstrap").forEach((element) => {
+                            element.className = element.className.replace(/bootstrap/g, "bootstrap-dark");
+                        }
+                        );
+                        document.querySelectorAll(".text-dark").forEach((element) => {
+                            element.className = element.className.replace(/text-dark/g, "text-light");
+                        });
+                        lightSwitch.checked = true;
+                    }
+                }
+                function lightMode() {
+                    if (lightSwitch.checked) {
+                        localStorage.setItem("lightSwitch", "dark");
+                        darkMode();
+                    } else {
+                        document.querySelectorAll(".bootstrap-dark").forEach((element) => {
+                            element.className = element.className.replace(/bootstrap-dark/g, "bootstrap");
+                        }
+                        );
+                        document.querySelectorAll(".text-light").forEach((element) => {
+                            element.className = element.className.replace(/text-light/g, "text-dark");
+                        });
+                        localStorage.removeItem("lightSwitch");
+                    }
+                }
+            }
+        }
+        )();
+    </script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
-</html>
 
+</html>

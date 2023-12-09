@@ -8,7 +8,11 @@
   }
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
   box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
@@ -19,4 +23,20 @@ html {
 
 body {
   margin-bottom: 60px;
+}
+foooter {
+  position: fixed;
+  height: 100px;
+  bottom: 0;
+  width: 100%;
+}
+
+/* Add this CSS to style the navbar and text colors for dark mode */
+.bg-dark {
+  background-color: #343a40 !important; /* Change the background color to a dark color of your choice */
+  color: #ffffff !important; /* Change the text color to light/white */
+}
+
+.navbar-dark .navbar-nav .nav-link {
+  color: #ffffff !important; /* Change the nav link text color to light/white */
 }
