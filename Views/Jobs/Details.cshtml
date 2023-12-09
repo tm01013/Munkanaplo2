@@ -116,40 +116,44 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalCenterTitle">Új alfeladat létrehozása</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn" data-bs-dismiss="modal"><strong>X</strong></button>
             </div>
             <div class="modal-body">
                 @if (SignInManager.IsSignedIn(User) && (User.Identity?.Name == Model.JobOwner || User.Identity?.Name ==
                 Model.JobCreator))
                 {
-                    <form class="form-inline" asp-controller="Jobs" asp-action="CreateSubTask">
+                    <form id="addSubTaskForm" class="form-inline" asp-controller="Jobs" asp-action="CreateSubTask">
                         <input type="hidden" name="JobId" value="@Model.Id"></input>
                         <div class="row">
                             <div class="col-1">
                                 <strong>• </strong>
                             </div>
-                            <div class="col-3 form-inline">
-                                <input name="TaskTitle" class="form-control w-10" placeholder="Cím" />
+                            <div class="col-4 form-inline">
+                                <input name="TaskTitle" class="form-control w-100" placeholder="Cím" />
                             </div>
-                            <div class="col-8 form-inline">
-                                <input name="TaskDetails" class="form-control w-30" placeholder="Leírás" />
+                            <div class="col-7 form-inline">
+                                <input name="TaskDetails" class="form-control w-100" placeholder="Leírás"
+                                    style="margin-left: 10px;" />
                             </div>
                         </div>
                         <input type="hidden" name="TaskCreator" class="form-control"
                             value="@User.Identity.Name.ToString()" />
                         <input type="hidden" name="TaskCreationDate" class="form-control"
                             value="@DateTime.Now.ToString("yyyy/MM/dd H:mm")" />
-                        <br>
-                        <div class="float-end">
-                            <input type="submit" value="Hozzáadás" class="btn btn-primary"></input>
-                        </div>
+                        <br />
                     </form>
-
                 }
                 else
                 {
-
                 }
+            </div>
+            <div class="modal-footer">
+                <div class="float-end">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Mégse</button>
+                    <a> | </a>
+                    <input type="submit" value="Hozzáadás" form="addSubTaskForm" class="btn btn-success"></input>
+                </div>
+
             </div>
         </div>
     </div>
@@ -198,7 +202,7 @@
             </div>
             <br />
             <div class="form-group">
-                <input type="submit" value="KÉSZ" class="btn btn-primary" />
+                <input type="submit" value="KÉSZ" class="btn btn-success" />
             </div>
         </form>
         <br />

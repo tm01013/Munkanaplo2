@@ -110,7 +110,7 @@ Model.JobCreator))
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <h5 class="modal-title" id="exampleModalCenterTitle">Alfeladat törlése</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    <button type="button" class="btn" data-bs-dismiss="modal"><strong>X</strong></button>
                                 </div>
                                 <div class="modal-body">
                                     @if (SignInManager.IsSignedIn(User) && (User.Identity?.Name == Model.JobOwner ||
