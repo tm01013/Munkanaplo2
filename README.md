@@ -51,9 +51,12 @@ sudo docker run --name Munkanaplo -itd -p <port amelyen futtatni akarod>:80 munk
 
 Ez a projekt az MIT licence alatt all.
 
+<details>
+  
 | Lehet                                        | Nem lehet                         | Muszály                                     |
 | -------------------------------------------- | --------------------------------- | ------------------------------------------- |
 | Kereskedelmi célú felhasználás               | Felelőségre vonni a felesztő(ke)t | A felylesztő(k) Copyright jogát feltüntetni |
 | Módosítani                                   |                                   | Tartalmaznia kell az MIT licence-t          |
 | Terjeszteni eredeti vagy módosított formában |                                   |                                             |
 | Privát használat                             |                                   |                                             |
+</details>
