@@ -9,14 +9,27 @@ Egy nyílt forráskódú munkanaplo vezetését megkönnyítő alkalmazás
 ### Rendszerkövetelmények
 
 - Docker 20+
-- Hivatalos Microsoft dotnet docker képek:
-
-  ```bash
-  sudo docker pull mcr.microsoft.com/dotnet/aspnet:7.0
-  sudo docker pull mcr.microsoft.com/dotnet/sdk:7.0.401
-  ```
 
 ### Futtatása
+
+> Ehhez adminisztrátori jogosultságra van szükség!
+
+1. Docker kép letöltése:
+
+```bash
+sudo docker pull tm01013/munkanaplo3
+```
+
+2. Szerver indítása:
+
+```bash
+sudo docker run --name Munkanaplo -itd -p <port amelyen futtatni akarod>:80 munkanaplo3
+```
+
+<details>
+<summary><h4>Telepítés forráskódból</h4></summary>
+
+> Ehhez adminisztrátori jogosultságra van szükség!
 
 1. Projekt klonolása:
 
@@ -25,21 +38,26 @@ git clone https://github.com/tm01013/Munkanaplo2.git
 cd Munkanaplo2
 ```
 
-2. Docker kép készítése
+2. Microsoft aspnet és dotnet sdk letöltése:
+
+```bash
+sudo docker pull mcr.microsoft.com/dotnet/aspnet:7.0
+sudo docker pull mcr.microsoft.com/dotnet/sdk:7.0.401
+```
+
+3. Docker kép készítése
 
 ```bash
 sudo docker build -t munkanaplo3 --no-cache .
 ```
 
-> Ehhez adminisztrátori jogosultságra van szükség
-
-3. Szerver indítása
+4. Szerver indítása
 
 ```bash
 sudo docker run --name Munkanaplo -itd -p <port amelyen futtatni akarod>:80 munkanaplo3
 ```
 
-> Ehhez adminisztrátori jogosultságra van szükség
+</details>
 
 </details>
 
@@ -51,12 +69,9 @@ sudo docker run --name Munkanaplo -itd -p <port amelyen futtatni akarod>:80 munk
 
 Ez a projekt az MIT licence alatt all.
 
-<details>
-  
 | Lehet                                        | Nem lehet                         | Muszály                                     |
 | -------------------------------------------- | --------------------------------- | ------------------------------------------- |
 | Kereskedelmi célú felhasználás               | Felelőségre vonni a felesztő(ke)t | A felylesztő(k) Copyright jogát feltüntetni |
 | Módosítani                                   |                                   | Tartalmaznia kell az MIT licence-t          |
 | Terjeszteni eredeti vagy módosított formában |                                   |                                             |
 | Privát használat                             |                                   |                                             |
-</details>
