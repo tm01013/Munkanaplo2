@@ -71,7 +71,12 @@ namespace Munkanaplo2.Controllers
 		[Authorize]
 		public async Task<IActionResult> Create([Bind("Id")] int Id)
 		{
-			var users = await _context.Users.ToListAsync();
+			List<string> users = new List<string>();
+			var usersInProject = await _context.ProjectMemberships.Where(pm => pm.ProjectId == Id).ToListAsync();
+			foreach (ProjectMembership pm in usersInProject)
+			{
+				users.Add(pm.Member);
+			}
 			ViewBag.Users = new SelectList(users);
 			ViewBag.ProjectId = Id;
 			return View();
@@ -142,8 +147,15 @@ namespace Munkanaplo2.Controllers
 			{
 				return NotFound();
 			}
-			var users = await _context.Users.ToListAsync();
+
+			List<string> users = new List<string>();
+			var usersInProject = await _context.ProjectMemberships.Where(pm => pm.ProjectId == jobModel.ProjectId).ToListAsync();
+			foreach (ProjectMembership pm in usersInProject)
+			{
+				users.Add(pm.Member);
+			}
 			ViewBag.Users = new SelectList(users);
+
 			ViewBag.ProjectId = jobModel.ProjectId;
 			ViewBag.SubTasks = subTasks;
 			return View(jobModel);
