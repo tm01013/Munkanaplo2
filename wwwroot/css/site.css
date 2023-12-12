@@ -29,6 +29,7 @@ foooter {
   height: 100px;
   bottom: 0;
   width: 100%;
+  opacity: 0.8;
 }
 
 /* Add this CSS to style the navbar and text colors for dark mode */
