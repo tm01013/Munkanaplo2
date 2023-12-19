@@ -16,7 +16,7 @@ Egy nyílt forráskódú munkanaplo vezetését megkönnyítő alkalmazás
 
 1. Docker kép letöltése:
     ```bash
-    udo docker pull tm01013/munkanaplo3
+    sudo docker pull tm01013/munkanaplo3
     ```
 
 2. Szerver indítása:
