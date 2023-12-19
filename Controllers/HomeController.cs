@@ -18,6 +18,15 @@ public class HomeController : Controller
         return View();
     }
 
+    public IActionResult Hiba()
+    {
+        return View("Hiba");
+    }
+    public IActionResult AccesDenied()
+    {
+        return View("AccesDenied");
+    }
+
     public IActionResult Privacy()
     {
         return View();

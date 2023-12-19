@@ -5,15 +5,24 @@
 }
 
 @using Microsoft.AspNetCore.Identity
+@using Munkanaplo2.Global
 @inject SignInManager<IdentityUser> SignInManager
 @inject UserManager<IdentityUser> UserManager
 
-<h1>Projektek</h1>
+@if (SignInManager.IsSignedIn(User))
+{
 
-<p>
+    <h1>Projektek</h1>
+
+
+    @if (!TeacherHelper.IsTeacher(User))
+    {
+        <p>
     <a asp-action="Create">Új projekt</a>
 </p>
-<table class="table">
+    }
+
+    <table class="table">
     <thead>
         <tr>
             <th>
@@ -27,61 +36,36 @@
     </thead>
     <tbody>
         @foreach (var item in Model)
-        {
-
-            List<string> memberNames = new List<string>();
-            foreach (ProjectMembership membership in item.ProjectMembers)
             {
-                memberNames.Add(membership.Member);
-            }
 
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.ProjectTitle)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.ProjectCreator)
-                </td>
-                @if (SignInManager.IsSignedIn(User))
+                List<string> memberNames = new List<string>();
+                foreach (ProjectMembership membership in item.ProjectMembers)
                 {
-                    <td>
+                    memberNames.Add(membership.Member);
+                }
+                @if (memberNames.Contains(User.Identity?.Name?.ToString()))
+                {
 
-                        @if (!memberNames.Contains(User.Identity?.Name?.ToString()))
-                        {
-                            <form class="form-inline" asp-action="AddMembership">
-                                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                                <input type="hidden" name="Id" value="@item.Id" />
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ProjectTitle)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ProjectCreator)
+                        </td>
 
-                                <div class="form-group">
-                                    <input type="hidden" name="ProjectTitle" class="form-control" value="@item.ProjectTitle" />
-                                </div>
-                                <div class="form-group">
-                                    <input type="hidden" name="ProjectMembersToAdd" class="form-control"
-                                        value="@User.Identity?.Name.ToString()"></input>
-                                    <div class="form-group">
-                                    </div>
-                                    <input type="hidden" name="ProjectCreator" class="form-control" value="@item.ProjectCreator" />
-                                </div>
-                                <input type="submit" value="Csatlakozás" class="btn btn-primary" /> <a> | </a> <a type="button"
-                                    class="btn btn-primary" asp-action="Details" asp-route-id="@item.Id">Részletek</a>
-                            </form>
-                        }
-                        else if (memberNames.Contains(User.Identity?.Name?.ToString()))
-                        {
+                        <td>
                             <form class="form-inline" asp-controller="Jobs" asp-action="Index">
                                 <input type="hidden" name="Id" value="@item.Id" />
                                 <a type="button" class="btn btn-primary" asp-action="Details" asp-route-id="@item.Id">Részletek</a>
                                 <a> | </a>
                                 <input type="submit" value="Feladatok" class="btn btn-primary" />
                             </form>
-                        }
-                        else
-                        {
-                            <a type="button" class="btn btn-primary" asp-action="Details" asp-route-id="@item.Id">Részletek</a>
-                        }
-                    </td>
+                        </td>
+
+                    </tr>
                 }
-            </tr>
-        }
-    </tbody>
-</table>
+            }
+        </tbody>
+    </table>
+}

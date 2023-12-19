@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Munkanaplo2.Data;
 using Munkanaplo2.Models;
+using Munkanaplo2.Global;
 
 namespace Munkanaplo2.Controllers
 {
@@ -18,31 +19,48 @@ namespace Munkanaplo2.Controllers
 		public JobsController(ApplicationDbContext context)
 		{
 			_context = context;
-			ProjectsController.ShowIndex += OnShowIndexReceved;
 		}
 
 		// GET: Jobs
+		[Authorize]
 		public async Task<IActionResult> Index([Bind("Id")] int Id)
 		{
-			if (TempData.ContainsKey("ProjectId"))
+			//if (TeacherHelper.IsTeacher(User)) return RedirectToAction("TeacherView");
+			var projectMemberships = _context.ProjectMemberships
+									.Where(pm => pm.ProjectId == Id)
+									.ToList();
+
+			if (!projectMemberships.Where(pm => pm.Member == User.Identity.Name).Any())
 			{
-				ViewBag.ProjectId = TempData["ProjectId"];
-				return View("Index", await _context.JobModel.Where(jm => jm.ProjectId == int.Parse(TempData["ProjectId"].ToString())).ToListAsync());
+				return View("AccesDenied");
 			}
-			else
-			{
-				ViewBag.ProjectId = Id;
-				return View("Index", await _context.JobModel.Where(jm => jm.ProjectId == Id).ToListAsync());
-			}
+
+			ViewBag.ProjectId = Id;
+			ViewBag.UnFinishedJobs = await _context.JobModel.Where(jm => jm.ProjectId == Id && jm.JobStatus == "folyamatban").ToListAsync();
+			ViewBag.FinishedJobs = await _context.JobModel.Where(jm => jm.ProjectId == Id && jm.JobStatus != "folyamatban").ToListAsync();
+			return View("Index");
 		}
 
+		/*[Authorize]
 		public async Task<IActionResult> TeacherView([Bind("Id")] int Id)
 		{
+			if (TeacherHelper.IsTeacher(User)) return RedirectToAction("Index");
+			var projectMemberships = _context.ProjectMemberships
+									.Where(pm => pm.ProjectId == Id)
+									.ToList();
+
+			if (!projectMemberships.Where(pm => pm.Member == User.Identity.Name).Any())
+			{
+				return View("AccesDenied");
+			}
 			ViewBag.ProjectId = Id;
-			return View(await _context.JobModel.Where(jm => jm.ProjectId == Id).ToListAsync());
-		}
+			ViewBag.UnFinishedJobs = await _context.JobModel.Where(jm => jm.ProjectId == Id && jm.JobStatus == "folyamatban").ToListAsync();
+			ViewBag.FinishedJobs = await _context.JobModel.Where(jm => jm.ProjectId == Id && jm.JobStatus != "folyamatban").ToListAsync();
+			return View();
+		}*/
 
 		// GET: Jobs/Details/5
+		[Authorize]
 		public async Task<IActionResult> Details(int id)
 		{
 			if (id == null || _context.JobModel == null)
@@ -54,6 +72,15 @@ namespace Munkanaplo2.Controllers
 				.FirstOrDefaultAsync(m => m.Id == id);
 			var subTasks = await _context.SubTaskModel
 				.Where(m => m.JobId == id).ToListAsync();
+
+			var projectMemberships = _context.ProjectMemberships
+									.Where(pm => pm.ProjectId == jobModel.ProjectId)
+									.ToList();
+
+			if (!projectMemberships.Where(pm => pm.Member == User.Identity.Name).Any())
+			{
+				return View("AccesDenied");
+			}
 
 			ViewBag.ProjectId = jobModel.ProjectId;
 			ViewBag.SubTasks = subTasks;
@@ -71,11 +98,21 @@ namespace Munkanaplo2.Controllers
 		[Authorize]
 		public async Task<IActionResult> Create([Bind("Id")] int Id)
 		{
+			if (TeacherHelper.IsTeacher(User)) return View("AccesDenied");
+			var projectMemberships = _context.ProjectMemberships
+									.Where(pm => pm.ProjectId == Id)
+									.ToList();
+
+			if (!projectMemberships.Where(pm => pm.Member == User.Identity.Name).Any())
+			{
+				return View("AccesDenied");
+			}
+
 			List<string> users = new List<string>();
 			var usersInProject = await _context.ProjectMemberships.Where(pm => pm.ProjectId == Id).ToListAsync();
 			foreach (ProjectMembership pm in usersInProject)
 			{
-				users.Add(pm.Member);
+				if (!TeacherHelper.IsTeacher(pm.Member)) users.Add(pm.Member);
 			}
 			ViewBag.Users = new SelectList(users);
 			ViewBag.ProjectId = Id;
@@ -90,15 +127,25 @@ namespace Munkanaplo2.Controllers
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> CreateConfirmed([Bind("Id,JobTitle,JobDescription,JobOwner,JobCreator,CreationDate,JobStatus,FinishDate,ProjectId")] JobModel jobModel)
 		{
+			if (TeacherHelper.IsTeacher(User)) return View("AccesDenied");
+			var projectMemberships = _context.ProjectMemberships
+									.Where(pm => pm.ProjectId == jobModel.ProjectId)
+									.ToList();
+
+			if (!projectMemberships.Where(pm => pm.Member == User.Identity.Name).Any())
+			{
+				return View("AccesDenied");
+			}
+
 			if (ModelState.IsValid)
 			{
 				_context.Add(jobModel);
 				await _context.SaveChangesAsync();
 
 				ViewBag.ProjectId = jobModel.ProjectId;
-				return View("Index", await _context.JobModel.Where(jm => jm.ProjectId == jobModel.ProjectId).ToListAsync());
+				return LocalRedirect("/" + jobModel.ProjectId + "/feladatok");
 			}
-			return View(jobModel);
+			return View("Create");
 		}
 
 		[HttpPost()]
@@ -106,6 +153,18 @@ namespace Munkanaplo2.Controllers
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> CreateSubTask([Bind("Id,TaskTitle,TaskDetails,JobId,TaskCreator,TaskCreationDate")] SubTaskModel subTaskModel)
 		{
+			if (TeacherHelper.IsTeacher(User)) return View("AccesDenied");
+
+			var jobModel = await _context.JobModel.FindAsync(subTaskModel.JobId);
+			var projectMemberships = _context.ProjectMemberships
+									.Where(pm => pm.ProjectId == jobModel.ProjectId)
+									.ToList();
+
+			if (!projectMemberships.Where(pm => pm.Member == User.Identity.Name).Any())
+			{
+				return View("AccesDenied");
+			}
+
 			if (ModelState.IsValid)
 			{
 				_context.Add(subTaskModel);
@@ -121,8 +180,21 @@ namespace Munkanaplo2.Controllers
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> DeleteSubTask([Bind("Id")] int id)
 		{
-
 			var subTask = await _context.SubTaskModel.FindAsync(id);
+			if (subTask == null) return NotFound();
+
+			if (TeacherHelper.IsTeacher(User)) return View("AccesDenied");
+
+			var jobModel = await _context.JobModel.FindAsync(subTask.JobId);
+			var projectMemberships = _context.ProjectMemberships
+									.Where(pm => pm.ProjectId == jobModel.ProjectId)
+									.ToList();
+
+			if (!projectMemberships.Where(pm => pm.Member == User.Identity.Name).Any())
+			{
+				return View("AccesDenied");
+			}
+
 			_context.Remove(subTask);
 			await _context.SaveChangesAsync();
 
@@ -142,6 +214,15 @@ namespace Munkanaplo2.Controllers
 			var jobModel = await _context.JobModel.FindAsync(id);
 			List<SubTaskModel> subTasks = await _context.SubTaskModel
 					.Where(m => m.JobId == jobModel.Id).ToListAsync();
+
+			if (TeacherHelper.IsTeacher(User)) return View("AccesDenied");
+			var projectMemberships = _context.ProjectMemberships
+									.Where(pm => pm.ProjectId == jobModel.ProjectId)
+									.ToList();
+			if (!projectMemberships.Where(pm => pm.Member == User.Identity.Name).Any())
+			{
+				return View("AccesDenied");
+			}
 
 			if (jobModel == null)
 			{
@@ -174,6 +255,17 @@ namespace Munkanaplo2.Controllers
 				return NotFound();
 			}
 
+			if (TeacherHelper.IsTeacher(User)) return View("AccesDenied");
+
+			var projectMemberships = _context.ProjectMemberships
+									.Where(pm => pm.ProjectId == jobModel.ProjectId)
+									.ToList();
+
+			if (!projectMemberships.Where(pm => pm.Member == User.Identity.Name).Any())
+			{
+				return View("AccesDenied");
+			}
+
 			if (ModelState.IsValid)
 			{
 				try
@@ -192,8 +284,7 @@ namespace Munkanaplo2.Controllers
 						throw;
 					}
 				}
-				TempData["ProjectId"] = jobModel.ProjectId;
-				return RedirectToAction("Index");
+				return LocalRedirect("/" + jobModel.ProjectId + "/feladatok");
 			}
 			return View("Hiba");
 		}
@@ -209,6 +300,17 @@ namespace Munkanaplo2.Controllers
 
 			var jobModel = await _context.JobModel
 				.FirstOrDefaultAsync(m => m.Id == id);
+			if (TeacherHelper.IsTeacher(User)) return View("AccesDenied");
+			var projectMemberships = _context.ProjectMemberships
+									.Where(pm => pm.ProjectId == jobModel.ProjectId)
+									.ToList();
+
+			if ((jobModel.JobOwner != User.Identity.Name.ToString()) && (jobModel.JobCreator != User.Identity.Name.ToString()))
+			{
+				return View("AccesDenied");
+			}
+
+
 			if (jobModel == null)
 			{
 				return NotFound();
@@ -230,6 +332,16 @@ namespace Munkanaplo2.Controllers
 			List<SubTaskModel> subTasks = await _context.SubTaskModel.Where(stm => stm.JobId == id).ToListAsync();
 			var jobModel = await _context.JobModel.FindAsync(id);
 
+			if (TeacherHelper.IsTeacher(User)) return View("AccesDenied");
+			var projectMemberships = _context.ProjectMemberships
+									.Where(pm => pm.ProjectId == jobModel.ProjectId)
+									.ToList();
+
+			if ((jobModel.JobOwner != User.Identity.Name.ToString()) && (jobModel.JobCreator != User.Identity.Name.ToString()))
+			{
+				return View("AccesDenied");
+			}
+
 			foreach (SubTaskModel subTask in subTasks)
 			{
 				_context.SubTaskModel.Remove(subTask);
@@ -242,20 +354,7 @@ namespace Munkanaplo2.Controllers
 
 			await _context.SaveChangesAsync();
 
-			TempData["ProjectId"] = jobModel.ProjectId;
-			return RedirectToAction("Index");
-		}
-
-		public void OnShowIndexReceved(int projectId, bool isShowTeacher)
-		{
-			if (!isShowTeacher)
-			{
-				Index(projectId);
-			}
-			else
-			{
-				TeacherView(projectId);
-			}
+			return LocalRedirect("/" + jobModel.ProjectId + "/feladatok");
 		}
 
 		private bool JobModelExists(int id)
