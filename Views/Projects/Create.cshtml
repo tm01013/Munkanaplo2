@@ -5,16 +5,20 @@
 }
 
 @using Microsoft.AspNetCore.Identity
+@using Munkanaplo2.Global
 @inject SignInManager<IdentityUser> SignInManager
 @inject UserManager<IdentityUser> UserManager
 
 
 @if (SignInManager.IsSignedIn(User))
 {
-    <h1>Új Projekt létrehozása</h1>
+    @if (!TeacherHelper.IsTeacher(User))
+    {
 
-    <hr />
-    <div class="row">
+        <h1>Új Projekt létrehozása</h1>
+
+        <hr />
+        <div class="row">
     <div class="col-md-4">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -37,6 +41,18 @@
         </form>
     </div>
 </div>
+    }
+    else
+    {
+        <div class="text-center">
+    <h1 class="display-4">HIBA!</h1>
+    <br>
+    <p><strong>Tanárként nem hozhatsz létre feladatokat ｡°(°.◜ᯅ◝°)°｡</strong></p>
+    <br>
+    <a>Ha úgy gondolod ,hogy a programmal van a gond jelensd </a><a
+        href="https://github.com/tm01013/Munkanaplo2.git">itt</a>
+</div>
+    }
 }
 <br>
 <div>

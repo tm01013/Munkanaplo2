@@ -4,6 +4,65 @@
 @inject UserManager<IdentityUser> UserManager
 @inject Munkanaplo2.Services.IProjectService projectService
 
+@{
+
+    bool UpdateAvailable = false;
+    using (var client = new HttpClient())
+    {
+        // Make the HTTP GET request
+        HttpResponseMessage response = await
+        client.GetAsync("https://raw.githubusercontent.com/tm01013/Munkanaplo2/main/LatestVersion.txt");
+
+        // Check if the response is successful
+        if (response.IsSuccessStatusCode)
+        {
+            // Read the content of the response
+            string content = await response.Content.ReadAsStringAsync();
+
+            // Process the content as needed
+            string currentVersionNumber = "3.1.0"; // Replace with the actual current version number
+            if (IsNewerVersion(content, currentVersionNumber))
+            {
+                UpdateAvailable = true;
+            }
+            else
+            {
+                UpdateAvailable = false;
+            }
+        }
+        else
+        {
+            UpdateAvailable = false;
+        }
+    }
+
+    bool IsNewerVersion(string latestVersion, string currentVersion)
+    {
+        List<string> currentVList = currentVersion.Split('.').ToList();
+        List<string> latestVList = latestVersion.Split('.').ToList();
+        if (currentVList.Count < latestVList.Count)
+        {
+            while (currentVList.Count != latestVList.Count)
+            {
+                currentVList.Add("0");
+            }
+        }
+        else if (latestVList.Count < currentVList.Count)
+        {
+            while (currentVList.Count != latestVList.Count)
+            {
+                latestVList.Add("0");
+            }
+        }
+
+        for (int i = 0; i < currentVList.Count; i++)
+        {
+            if (int.Parse(currentVList[i]) < int.Parse(latestVList[i])) return true;
+        }
+        return false;
+    }
+}
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -62,13 +121,6 @@
                                     asp-action="Index">Projektek</a>
                             </li>
                         }
-                        else
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-light" asp-area="" asp-controller="Projects"
-                                    asp-action="TeacherView">Munkanapló megtekintése tanárként</a>
-                            </li>
-                        }
                         @if (SignInManager.IsSignedIn(User))
                         {
                             List<ProjectModel> allProjects = projectService.GetProjectsAsync();
@@ -109,10 +161,19 @@
             @RenderBody()
         </main>
     </div>
-    <footer class="fixed-bottom justify-content-between align-items-center py-3 my-4 border-top">
-        <div class="col-md-4 d-flex align-items-center">
-            <br><span class="text-muted">© Tatár Márton - @DateTime.Now.ToString("yyyy") - <a asp-controller="Home"
+    <footer class="fixed-bottom justify-content-between align-items-center py-3 my-4 border-top row">
+        <div class="col-md-4 d-flex d-inline align-items-center justify-content-start">
+            <br><span class="ms-3 text-muted">© Tatár Márton - @DateTime.Now.ToString("yyyy") - <a asp-controller="Home"
                     asp-action="Privacy">Használati feltételek</a></span>
+        </div>
+        <div class="col-md-4 d-flex d-inline align-items-center justify-content-center">
+            @if (UpdateAvailable)
+            {
+                <span class="text-muted">Új verzió érhető el! ◝(ᵔᗜᵔ)◜</span>
+            }
+        </div>
+        <div class="me-3 col-md-4 d-flex d-inline align-items-center justify-content-end">
+            <span class="text-muted">Munkanapló v3.1 - 2023.12.19</span>
         </div>
     </footer>
     <script>

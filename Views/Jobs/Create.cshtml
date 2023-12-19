@@ -5,16 +5,21 @@
 }
 
 @using Microsoft.AspNetCore.Identity
+@using Munkanaplo2.Global
 @inject SignInManager<IdentityUser> SignInManager
 @inject UserManager<IdentityUser> UserManager
 
 
 @if (SignInManager.IsSignedIn(User))
 {
-    <h1>Új feladat kiosztása</h1>
+    @if (!TeacherHelper.IsTeacher(User))
+    {
 
-    <hr />
-    <div class="row">
+
+        <h1>Új feladat kiosztása</h1>
+
+        <hr />
+        <div class="row">
     <div class="col-md-4">
         <form asp-controller="Jobs" asp-action="CreateConfirmed">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -71,6 +76,23 @@
         </form>
     </div>
 </div>
+    }
+    else
+    {
+        <br />
+        <br />
+        <div class="text-center">
+    <h1 class="display-4">HIBA!</h1>
+    <br>
+    <p><strong>A feladatokat tanárként nem hozhatsz létre ｡°(°.◜ᯅ◝°)°｡</strong></p>
+    <br>
+    <a>Ha úgy gondolod ,hogy a programmal van a gond jelensd </a><a
+        href="https://github.com/tm01013/Munkanaplo2.git">itt</a>
+    <br />
+    <a type="button" class="btn btn-primary" asp-controller="Jobs" asp-route-id="@Model.ProjectId"
+        asp-action="Index">Vissza</a>
+</div>
+    }
 }
 <br>
 <div>

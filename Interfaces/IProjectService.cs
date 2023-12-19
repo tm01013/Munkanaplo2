@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 namespace Munkanaplo2.Services
 {
     public interface IProjectService
-    {     
+    {
         List<ProjectModel> GetProjectsAsync();
+        List<string> GetProjectMembers(int id);
     }
 }

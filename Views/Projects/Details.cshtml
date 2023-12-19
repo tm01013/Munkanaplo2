@@ -6,7 +6,7 @@
     int count = Model.ProjectMembers.Count();
 
     List<string> memberNames = new List<string>();
-    foreach(ProjectMembership membership in Model.ProjectMembers)
+    foreach (ProjectMembership membership in Model.ProjectMembers)
     {
         memberNames.Add(membership.Member);
     }
@@ -15,80 +15,97 @@
 @using Microsoft.AspNetCore.Identity
 @inject SignInManager<IdentityUser> SignInManager
 @inject UserManager<IdentityUser> UserManager
+@if (SignInManager.IsSignedIn(User))
+{
+    @if (memberNames.Contains(User.Identity?.Name?.ToString()))
+    {
+        <h1>Részletek</h1>
 
-<h1>Részletek</h1>
-
-<div>
+        <div>
     <hr />
     <dl class="row">
         <dt class="col-sm-2">
-                Cím
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.ProjectTitle)
-            </dd>
+            Cím
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.ProjectTitle)
+        </dd>
 
-            <dt class="col-sm-2">
-                Tulajdonos
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.ProjectCreator)
-            </dd>
+        <dt class="col-sm-2">
+            Tulajdonos
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.ProjectCreator)
+        </dd>
 
-            <dt class="col-sm-2">
-                Tagok
-            </dt>
-            <dd class="col-sm-10">
-                @{
-                    foreach(ProjectMembership member in ViewBag.ProjectMemberships)
-                    {
-                        memberString = memberString + ", " + member.Member;    
+        <dt class="col-sm-2">
+            Tagok
+        </dt>
+        <dd class="col-sm-10">
+            @{
+                        foreach (ProjectMembership member in ViewBag.ProjectMemberships)
+                        {
+                            memberString = memberString + ", " + member.Member;
+                        }
+                        memberString = memberString.Substring(2);
                     }
-                    memberString = memberString.Substring(2);
-                }
-                @memberString
-            </dd>
+                    @memberString
+                </dd>
 
-    </dl>
-</div>
-<div>
-    
+            </dl>
+        </div>
+        <div>
+
     <br />
-    @if(SignInManager.IsSignedIn(User) && User.Identity?.Name?.ToString() == Model.ProjectCreator)
-    {
-        <a type="button" class="btn btn-primary" asp-action="Edit" asp-route-id="@Model?.Id">Szerkesztés</a> <a> | </a> <a type="button" class="btn btn-danger" asp-action="Delete" asp-route-id="@Model?.Id">Törlés</a> <a> | </a> <a type="button" class="btn btn-primary" asp-action="Index">Vissza</a>
-    }
-    else if(SignInManager.IsSignedIn(User) && (memberNames.Contains(User.Identity?.Name?.ToString()) && User.Identity?.Name?.ToString() != Model.ProjectCreator))
-    {
-        <form asp-action="DeleteMembership">
-        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-        <input type="hidden" name="Id" value="@Model.Id"/>
+    @if (SignInManager.IsSignedIn(User) && User.Identity?.Name?.ToString() == Model.ProjectCreator)
+            {
+                <p><a type="button" class="btn btn-primary" asp-controller="Projects" asp-action="EditProjectMembers"
+                        asp-route-id="@Model?.Id">Tagok szerkesztése</a> <a> | </a> <a type="button" class="btn btn-primary"
+                        asp-action="Edit" asp-route-id="@Model?.Id">Szerkesztés</a> <a> | </a> <a type="button"
+                        class="btn btn-danger" asp-action="Delete" asp-route-id="@Model?.Id">Törlés</a></p>
+                <p><a type="button" class="btn btn-primary" asp-action="Index">Vissza</a></p>
+            }
+            else if (SignInManager.IsSignedIn(User) && (memberNames.Contains(User.Identity?.Name?.ToString()) &&
+            User.Identity?.Name?.ToString() != Model.ProjectCreator))
+            {
+                <form asp-action="DeleteMembership">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <input type="hidden" name="Id" value="@Model.Id" />
 
-        <div class="form-group">
-            <input type="hidden" name="ProjectTitle" class="form-control" value="@Model.ProjectTitle"/>
-            <span asp-validation-for="ProjectTitle" class="text-danger"></span>
+                    <div class="form-group">
+                        <input type="hidden" name="ProjectTitle" class="form-control" value="@Model.ProjectTitle" />
+                        <span asp-validation-for="ProjectTitle" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <input type="hidden" name="ProjectMembersToRemove" class="form-control"
+                            value="@User.Identity?.Name.ToString()"></input>
+                        <span asp-validation-for="ProjectMembers" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <input type="hidden" name="ProjectCreator" class="form-control" value="@Model.ProjectCreator" />
+                        <span asp-validation-for="ProjectCreator" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" value="Kilépés" class="btn btn-danger" />
+                        <a> | </a>
+                        <a type="button" class="btn btn-primary" asp-action="Index">Vissza</a>
+                    </div>
+                </form>
+            }
+            else
+            {
+                <a type="button" class="btn btn-primary" asp-action="Index">Vissza</a>
+            }
         </div>
-        <div class="form-group">
-            <input type="hidden" name="ProjectMembersToRemove" class="form-control" value="@User.Identity?.Name.ToString()"></input>
-            <span asp-validation-for="ProjectMembers" class="text-danger"></span>
-        </div>
-        <div class="form-group">
-            <input type="hidden" name="ProjectCreator" class="form-control" value="@Model.ProjectCreator"/>
-            <span asp-validation-for="ProjectCreator" class="text-danger"></span>
-        </div>
-        <div class="form-group">
-            <input type="submit" value="Kilépés" class="btn btn-danger" />
-            <a> | </a>
-            <a type="button" class="btn btn-primary" asp-action="Index">Vissza</a>
-        </div>
-        </form>                
-    }
-    else if (!SignInManager.IsSignedIn(User))
-    {
-        <a type="button" class="btn btn-primary" asp-action="TeacherView">Vissza</a>
+
     }
     else
     {
-        <a type="button" class="btn btn-primary" asp-action="Index">Vissza</a>
-    }
+        <div class="text-center">
+    <h1 class="display-4">Hiba!</h1>
+    <br>
+    <p><strong>｡°(°.◜ᯅ◝°)°｡ Ennek a projektnek nem vagy tagja! (⌐■_■)</strong></p>
+    <p><a type="button" class="btn btn-primary" asp-action="Index">Vissza</a></p>
 </div>
+    }
+}

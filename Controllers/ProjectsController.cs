@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Munkanaplo2.Data;
 using Munkanaplo2.Models;
+using Microsoft.AspNetCore.Identity;
+using Munkanaplo2.Global;
 
 namespace Munkanaplo2.Controllers
 {
@@ -15,36 +17,60 @@ namespace Munkanaplo2.Controllers
     {
         private readonly ApplicationDbContext _context;
 
-        public delegate void ShowIndexHandler(int projectId, bool isTeacher);
-        public static event ShowIndexHandler ShowIndex;
-
         public ProjectsController(ApplicationDbContext context)
         {
             _context = context;
         }
 
         // GET: Projects
+        [Authorize]
         public async Task<IActionResult> Index()
         {
-            var projectMemberships = _context.ProjectMemberships.ToList();
-            ViewBag.ProjectMemberships = projectMemberships;
+            if (User.Identity.Name != null)
+            {
+                var projectMemberships = _context.ProjectMemberships.ToList();
+                ViewBag.ProjectMemberships = projectMemberships;
 
-            return _context.ProjectModel != null ?
-                        View(await _context.ProjectModel.ToListAsync()) :
-                        Problem("Entity set 'ApplicationDbContext.ProjectModel'  is null.");
+                return _context.ProjectModel != null ?
+                            View(await _context.ProjectModel.Where(pm => pm.ProjectMembers.Where(m => m.Member == User.Identity.Name.ToString()).Any()).ToListAsync()) :
+                            Problem("Entity set 'ApplicationDbContext.ProjectModel'  is null.");
+
+            }
+            /*else if (User.Identity.Name != null && TeacherHelper.IsTeacher(User.Identity.Name))
+            {
+                return RedirectToAction("TeacherView");
+            }*/
+            else
+            {
+                return View("Hiba");
+            }
         }
 
+        /*[Authorize]
         public async Task<IActionResult> TeacherView()
         {
-            var projectMemberships = _context.ProjectMemberships.ToList();
-            ViewBag.ProjectMemberships = projectMemberships;
+            if (User.Identity.Name != null && TeacherHelper.IsTeacher(User.Identity.Name))
+            {
+                var projectMemberships = _context.ProjectMemberships.ToList();
+                ViewBag.ProjectMemberships = projectMemberships;
 
-            return _context.ProjectModel != null ?
-                        View(await _context.ProjectModel.ToListAsync()) :
-                        Problem("Entity set 'ApplicationDbContext.ProjectModel'  is null.");
-        }
+                return _context.ProjectModel != null ?
+                            View(await _context.ProjectModel.Where(pm => pm.ProjectMembers.Where(m => m.Member == User.Identity.Name.ToString()).Any()).ToListAsync()) :
+                            Problem("Entity set 'ApplicationDbContext.ProjectModel'  is null.");
+
+            }
+            else if (User.Identity.Name != null && !TeacherHelper.IsTeacher(User.Identity.Name))
+            {
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                return View("Hiba");
+            }
+        }*/
 
         // GET: Projects/Details/5
+        [Authorize]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null || _context.ProjectModel == null)
@@ -58,6 +84,11 @@ namespace Munkanaplo2.Controllers
             var projectMemberships = _context.ProjectMemberships
                         .Where(pm => pm.ProjectId == id)
                         .ToList();
+
+            if (!projectMemberships.Where(pm => pm.Member == User.Identity.Name).Any())
+            {
+                return View("AccesDenied");
+            }
             ViewBag.ProjectMemberships = projectMemberships;
 
             if (ProjectModel == null)
@@ -72,7 +103,8 @@ namespace Munkanaplo2.Controllers
         [Authorize]
         public async Task<IActionResult> Create()
         {
-            return View();
+            if (!TeacherHelper.IsTeacher(User)) return View();
+            else return View("AccesDenied");
         }
 
         // POST: Projects/Create
@@ -85,6 +117,8 @@ namespace Munkanaplo2.Controllers
         {
             //if (ModelState.IsValid)
             //{
+            if (TeacherHelper.IsTeacher(User)) return View("AccesDenied");
+
             ProjectModel inputModel = ProjectModel;
             int projectId = 1;
             if (_context.ProjectModel.Any())
@@ -124,6 +158,8 @@ namespace Munkanaplo2.Controllers
         // GET: Projects/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
+            if (TeacherHelper.IsTeacher(User)) return View("AccesDenied");
+
             if (id == null || _context.ProjectModel == null)
             {
                 return NotFound();
@@ -134,6 +170,12 @@ namespace Munkanaplo2.Controllers
             {
                 return NotFound();
             }
+
+            if (ProjectModel.ProjectCreator != User.Identity.Name.ToString())
+            {
+                return View("AccesDenied");
+            }
+
             var users = await _context.Users.ToListAsync();
             ViewBag.Users = new SelectList(users);
             return View(ProjectModel);
@@ -152,12 +194,18 @@ namespace Munkanaplo2.Controllers
                 return NotFound();
             }
 
+            var projectMemberships = _context.ProjectMemberships
+                        .Where(pm => pm.ProjectId == id)
+                        .ToList();
+
+            if (TeacherHelper.IsTeacher(User)) return View("AccesDenied");
+            if (!projectMemberships.Where(pm => pm.Member == User.Identity.Name).Any())
+            {
+                return View("AccesDenied");
+            }
+
             if (ProjectModel.ProjectCreator != null && ProjectModel.ProjectTitle != null)
             {
-
-                var projectMemberships = _context.ProjectMemberships
-                    .Where(pm => pm.ProjectId == ProjectModel.Id)
-                    .ToList();
 
                 var projectModelToAdd = new ProjectModel
                 {
@@ -198,12 +246,17 @@ namespace Munkanaplo2.Controllers
                 return NotFound();
             }
 
+            var projectMemberships = _context.ProjectMemberships
+                                    .Where(pm => pm.ProjectId == id)
+                                    .ToList();
+
+            if (!projectMemberships.Where(pm => pm.Member == User.Identity.Name).Any())
+            {
+                return View("AccesDenied");
+            }
+
             if (ProjectModel.ProjectCreator != null && ProjectModel.ProjectTitle != null && projectMembersToRemove != string.Empty)
             {
-
-                var projectMemberships = _context.ProjectMemberships
-                    .Where(pm => pm.ProjectId == ProjectModel.Id)
-                    .ToList();
 
                 var projectMembershipToRemove = new ProjectMembership
                 {
@@ -242,10 +295,10 @@ namespace Munkanaplo2.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View("Error");
+            return View("Hiba");
         }
 
-        [HttpPost]
+        /*[HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddMembership(int id, [Bind("Id, ProjectTitle, ProjectCreator")] ProjectModel ProjectModel, [Bind("ProjectMembersToAdd")] string projectMembersToAdd)
@@ -298,6 +351,113 @@ namespace Munkanaplo2.Controllers
                 return RedirectToAction(nameof(Index));
             }
             return View("Error");
+        }*/
+
+        [Authorize]
+        public async Task<IActionResult> EditProjectMembers(int? id)
+        {
+            if (id == null || _context.ProjectModel == null)
+            {
+                return NotFound();
+            }
+
+
+            var ProjectModel = await _context.ProjectModel.FindAsync(id);
+            if (ProjectModel == null)
+            {
+                return NotFound();
+            }
+            var projectMemberships = _context.ProjectMemberships
+                                    .Where(pm => pm.ProjectId == ProjectModel.Id)
+                                    .ToList();
+
+            if (TeacherHelper.IsTeacher(User)) return View("AccesDenied");
+            if (!projectMemberships.Where(pm => pm.Member == User.Identity.Name).Any())
+            {
+                return View("AccesDenied");
+            }
+
+            if (ProjectModel.ProjectCreator != User.Identity.Name.ToString()) return View("AccesDenied");
+
+            ViewBag.ProjectCreator = ProjectModel.ProjectCreator;
+            ViewBag.ProjectId = ProjectModel.Id;
+
+            List<ProjectMembership> memberships = await _context.ProjectMemberships.Where(pm => pm.ProjectId == ProjectModel.Id).ToListAsync();
+            var users = await _context.Users.ToListAsync();
+
+            List<EditUsersViewModel> viewModels = new List<EditUsersViewModel>();
+            foreach (ProjectMembership membership in memberships)
+            {
+                if (membership.Member != ProjectModel.ProjectCreator)
+                {
+                    EditUsersViewModel viewModel = new EditUsersViewModel
+                    {
+                        UserName = membership.Member,
+                        IsAdded = true
+                    };
+                    viewModels.Add(viewModel);
+
+                }
+            }
+            foreach (var user in users)
+            {
+                if (!viewModels.Where(vm => vm.UserName == user.UserName).Any() && user.UserName != ProjectModel.ProjectCreator)
+                {
+                    EditUsersViewModel viewModel = new EditUsersViewModel
+                    {
+                        UserName = user.UserName,
+                        IsAdded = false
+                    };
+                    viewModels.Add(viewModel);
+
+                }
+            }
+
+            return View("EditUsers", viewModels);
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditProjectMembersConfirmed(int ProjectId, List<EditUsersViewModel> editUsersViewModels)
+        {
+            ProjectModel project = await _context.ProjectModel.FindAsync(ProjectId);
+
+            var projectMemberships = _context.ProjectMemberships
+                                    .Where(pm => pm.ProjectId == ProjectId)
+                                    .ToList();
+
+            if (TeacherHelper.IsTeacher(User)) return View("AccesDenied");
+            if (!projectMemberships.Where(pm => pm.Member == User.Identity.Name).Any())
+            {
+                return View("AccesDenied");
+            }
+            if (project.ProjectCreator != User.Identity.Name.ToString()) return View("AccesDenied");
+
+            if (project != null)
+            {
+                List<ProjectMembership> memberships = await _context.ProjectMemberships.Where(pm => pm.ProjectId == ProjectId).ToListAsync();
+                foreach (EditUsersViewModel item in editUsersViewModels)
+                {
+                    ProjectMembership correspondingMembership = null;
+                    foreach (ProjectMembership membership in memberships)
+                    {
+                        if (membership.Member == item.UserName)
+                        {
+                            correspondingMembership = membership;
+                            break;
+                        }
+                    }
+
+                    if (correspondingMembership != null && item.IsAdded == true) { }
+                    else if (correspondingMembership == null && item.IsAdded == true) AddMember(item.UserName, ProjectId);
+                    else if (correspondingMembership != null && item.IsAdded == false) RemoveMember(item.UserName, ProjectId);
+                    else if (correspondingMembership == null && item.IsAdded == false) { }
+                }
+
+                return LocalRedirect("/projektek/" + project.Id);
+            }
+            return LocalRedirect("/hiba");
         }
 
         [Authorize]
@@ -315,6 +475,14 @@ namespace Munkanaplo2.Controllers
             var projectMemberships = _context.ProjectMemberships
                         .Where(pm => pm.ProjectId == id)
                         .ToList();
+
+            if (TeacherHelper.IsTeacher(User)) return View("AccesDenied");
+            if (ProjectModel.ProjectCreator != User.Identity.Name.ToString())
+            {
+                return View("AccesDenied");
+            }
+
+
             ViewBag.ProjectMemberships = projectMemberships;
             if (ProjectModel == null)
             {
@@ -340,6 +508,12 @@ namespace Munkanaplo2.Controllers
             var jobs = _context.JobModel.Where(jm => jm.ProjectId == id).ToList();
 
             var ProjectModel = await _context.ProjectModel.FindAsync(id);
+
+            if (TeacherHelper.IsTeacher(User)) return View("AccesDenied");
+            if (ProjectModel.ProjectCreator != User.Identity.Name.ToString())
+            {
+                return View("AccesDenied");
+            }
 
             List<SubTaskModel> subTasks = new List<SubTaskModel>();
             foreach (var job in jobs)
@@ -375,5 +549,60 @@ namespace Munkanaplo2.Controllers
         {
             return (_context.ProjectModel?.Any(e => e.Id == id)).GetValueOrDefault();
         }
+
+        void AddMember(string name, int projectId)
+        {
+            var project = _context.ProjectModel
+                .Include(p => p.ProjectMembers)
+                .FirstOrDefault(p => p.Id == projectId);
+
+            if (project != null && project.ProjectCreator != null && project.ProjectTitle != null && name != string.Empty)
+            {
+                var projectMembershipToAdd = new ProjectMembership
+                {
+                    ProjectId = projectId,
+                    Member = name
+                };
+
+                project.ProjectMembers.Add(projectMembershipToAdd);
+
+                try
+                {
+                    _context.SaveChanges();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    throw;
+                }
+            }
+        }
+
+        void RemoveMember(string name, int projectId)
+        {
+            var project = _context.ProjectModel
+                .Include(p => p.ProjectMembers)
+                .FirstOrDefault(p => p.Id == projectId);
+
+            if (project != null && name != string.Empty)
+            {
+                var projectMembershipToRemove = project.ProjectMembers
+                    .FirstOrDefault(pm => pm.ProjectId == projectId && pm.Member == name);
+
+                if (projectMembershipToRemove != null)
+                {
+                    project.ProjectMembers.Remove(projectMembershipToRemove);
+
+                    try
+                    {
+                        _context.SaveChanges();
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        throw;
+                    }
+                }
+            }
+        }
+
     }
 }

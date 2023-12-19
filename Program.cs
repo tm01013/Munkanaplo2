@@ -18,7 +18,7 @@ builder.Services.Configure<IdentityOptions>(options =>
 {
     // Default User settings.
     options.User.AllowedUserNameCharacters =
-            "aábcdeéfghiíjklmnoóöőpqrstuúüűvwxyzAÁBCDEÉFGHIÍJKLMNOÓÖŐPQRSTUÚÜŰVWXYZ0123456789-._@+ ";
+            "aábcdeéfghiíjklmnoóöőpqrstuúüűvwxyzAÁBCDEÉFGHIÍJKLMNOÓÖŐPQRSTUÚÜŰVWXYZ0123456789-._@+ []";
     options.User.RequireUniqueEmail = false;
 
 });
@@ -112,11 +112,25 @@ app.MapControllerRoute(
     defaults: new { controller = "Projects", action = "Edit", id = "" }
     );
 app.MapControllerRoute(
+    name: "projektek/szerkesztés",
+    pattern: "projektek/tagok-szekesztése/{id}",
+    defaults: new { controller = "Projects", action = "EditProjectMembers", id = "" }
+    );
+app.MapControllerRoute(
     name: "projektek/feladat-törlése",
     pattern: "projektek/projekt-törlése/{id}",
     defaults: new { controller = "Projects", action = "Delete", id = "" }
     );
 #endregion
+
+app.MapControllerRoute(
+    name: "hiba",
+    pattern: "hiba",
+    defaults: new { controller = "Home", action = "Hiba" });
+app.MapControllerRoute(
+    name: "hiba",
+    pattern: "hozzáférés-megtagadva",
+    defaults: new { controller = "Home", action = "AccesDenied" });
 
 app.MapControllerRoute(
     name: "default",

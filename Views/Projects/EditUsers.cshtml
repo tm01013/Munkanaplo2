@@ -1,0 +1,110 @@
+@model List<Munkanaplo2.Models.EditUsersViewModel>
+
+@{
+    ViewData["Title"] = "Tagok szerkesztése";
+    string canEdit = ViewBag.ProjectCreator;
+    List<string> isAddedStrings = new List<string>();
+    for (int i = 0; i < Model.Count; i++)
+    {
+        isAddedStrings.Add(Model[i].IsAdded ? "true" : "false");
+    }
+}
+
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+
+
+@if (SignInManager.IsSignedIn(User) && User.Identity?.Name == ViewBag.ProjectCreator)
+{
+    <h1>Tagok szerkesztése</h1>
+    <hr />
+    <div class="col-8">
+    <form id="EditProjectMembersForm" asp-action="EditProjectMembersConfirmed" asp-controller="Projects">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input type="hidden" name="ProjectId" value="@ViewBag.ProjectId" />
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th scope="col" class="col-4"><input id="searchInput" type="text" class="form-control"
+                            onkeyup="myFunction()" placeholder="Keresés..."></th>
+                    <th scope="col" class="col-2"><input type="submit" value="Mentés" class="btn btn-primary" /><a> |
+                        </a><a type="button" class="btn btn-primary" asp-action="Index">Vissza</a></th>
+                </tr>
+            </thead>
+            <tbody id="table">
+                @for (int i = 0; i < Model.Count; i++)
+                    {
+                        <tr>
+                            <th scope="row">@Model[i].UserName</th>
+
+                            <input name="editUsersViewModels[@i].UserName" type="hidden" value="@Model[i].UserName" />
+                            <input type="hidden" value="@isAddedStrings[i]" name="editUsersViewModels[@i].IsAdded"
+                                id="@(i)-IsAdded" />
+
+                            <td>
+                                <button type="button" id="@(i)-button" class="btn btn-success"
+                                    onclick="updateStatus(@i)">Add</button>
+                                <script>
+                                    document.getElementById("@(i)-button").className = "@(Model[i].IsAdded ? "btn btn-danger" : "btn btn-success")";
+                                    document.getElementById("@(i)-button").textContent = "@(Model[i].IsAdded)" == "True" ? "Eltávolítás" : "Hozzáadás";
+                                </script>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </form>
+    </div>
+}
+
+<script>
+    function myFunction() {
+        var input, filter, table, tr, td, i, txtValue;
+        input = document.getElementById("searchInput");
+        filter = input.value.toUpperCase();
+        table = document.getElementById("table");
+        tr = table.getElementsByTagName("tr");
+        for (i = 0; i < tr.length; i++) {
+            td = tr[i].getElementsByTagName("th")[0];
+            if (td) {
+                txtValue = td.textContent || td.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    }
+
+</script>
+
+<script>
+    function updateStatus(index) {
+        let currentStatus = document.getElementById(index + "-IsAdded").value == "true" ? true : false;
+        let newStatus = !currentStatus;
+        let button = document.getElementById(index + "-button");
+
+        button.textContent = newStatus ? "Eltávolítás" : "Hozzáadás";
+        button.className = newStatus ? "btn btn-danger" : "btn btn-success";
+
+        document.getElementById(index + "-IsAdded").value = newStatus;
+    }
+</script>
+
+@if (SignInManager.IsSignedIn(User) && User.Identity?.Name != ViewBag.ProjectCreator)
+{
+    <br />
+    <br />
+    <h3>Hiba!</h3>
+    <h4>Ezt a projektet csak @canEdit szerkesztheti.</h4>
+    <br />
+    <a type="button" class="btn btn-primary" asp-action="Details" asp-route-id="@ViewBag.ProjectId">Vissza</a>
+}
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

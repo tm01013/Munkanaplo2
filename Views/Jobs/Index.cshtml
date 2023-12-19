@@ -1,22 +1,30 @@
-@model IEnumerable<Munkanaplo2.Models.JobModel>
-
 @{
     ViewData["Title"] = "Feladatok";
 }
 
 @using Microsoft.AspNetCore.Identity
+@using Munkanaplo2.Global
+@using Munkanaplo2.Services
+@inject IProjectService projectService
 @inject SignInManager<IdentityUser> SignInManager
 @inject UserManager<IdentityUser> UserManager
 
-<h1>Feladatok</h1>
+@if (SignInManager.IsSignedIn(User))
+{
+    @if (projectService.GetProjectMembers(ViewBag.ProjectId).Contains(User.Identity.Name.ToString()))
+    {
+        <h1>Feladatok</h1>
 
-
-<form class="form-inline" asp-controller="Jobs" asp-action="Create">
+        @if (!TeacherHelper.IsTeacher(User))
+        {
+            <form class="form-inline" asp-controller="Jobs" asp-action="Create">
     <input type="hidden" name="Id" value="@ViewBag.ProjectId"></input>
     <input type="submit" value="Új feladat" class="btn btn-primary"></input>
 </form>
-<br>
-<table class="table">
+        }
+
+        <br>
+        <table class="table">
     <thead>
         <tr>
             <th>
@@ -41,41 +49,87 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.JobTitle)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.JobDescription)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.JobOwner)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.JobStatus)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.JobCreator)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreationDate)
-            </td>
-            @if (SignInManager.IsSignedIn(User))
-            {
-                <td>
-                    @if(User.Identity?.Name == item.JobOwner || User.Identity?.Name == item.JobCreator)
-                    {
-                        <a asp-controller="Jobs" asp-action="Edit" asp-route-id="@item.Id">Szerkesztés</a> <a> | </a>
-                    }
-                    <a type="button" class="btn btn-primary" asp-controller="Jobs" asp-action="Details" asp-route-id="@item.Id">Részletek</a> 
-                    @if(User.Identity?.Name == item.JobOwner || User.Identity?.Name == item.JobCreator)
-                    {
-                        <a> | </a> <a asp-controller="Jobs" asp-action="Delete" asp-route-id="@item.Id">Törlés</a>
-                    }
-                </td>
-            }
-        </tr>
+        @foreach (JobModel item in ViewBag.UnFinishedJobs)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.JobTitle)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.JobDescription)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.JobOwner)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.JobStatus)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.JobCreator)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.CreationDate)
+                        </td>
+                        <td>
+                            @if (!TeacherHelper.IsTeacher(User))
+                            {
+                                <a asp-controller="Jobs" asp-action="Edit" asp-route-id="@item.Id">Szerkesztés</a> <a> | </a>
+                                <a type="button" class="btn btn-primary" asp-controller="Jobs" asp-action="Details"
+                                    asp-route-id="@item.Id">Részletek</a>
+                                <a> | </a> <a asp-controller="Jobs" asp-action="Delete" asp-route-id="@item.Id">Törlés</a>
+                            }
+                        </td>
+                    </tr>
+                }
+                @foreach (JobModel item in ViewBag.FinishedJobs)
+                {
+                    <tr style="opacity: .5;">
+                        <td>
+                            @Html.DisplayFor(modelItem => item.JobTitle)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.JobDescription)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.JobOwner)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.JobStatus)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.JobCreator)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.CreationDate)
+                        </td>
+                        <td>
+                            @if (!TeacherHelper.IsTeacher(User))
+                            {
+                                <a asp-controller="Jobs" asp-action="Edit" asp-route-id="@item.Id">Szerkesztés</a> <a> | </a>
+                                <a type="button" class="btn btn-primary" asp-controller="Jobs" asp-action="Details"
+                                    asp-route-id="@item.Id">Részletek</a>
+                                <a> | </a> <a asp-controller="Jobs" asp-action="Delete" asp-route-id="@item.Id">Törlés</a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <br />
+        <br />
+        <div class="text-center">
+    <h1 class="display-4">HIBA!</h1>
+    <br>
+    <p><strong>Ehhez nincs jogosultságod! ｡°(°.◜ᯅ◝°)°｡</strong></p>
+    <p>Csak akkor tudod nézegetni a feladatokat ha a projektnet tagja vagy.</p>
+    <br>
+    <a>Ha úgy gondolod ,hogy a programmal van a gond jelensd </a><a
+        href="https://github.com/tm01013/Munkanaplo2.git">itt</a>
+    <br />
+    <a type="button" class="btn btn-primary" asp-action="Index" asp-controller="Home">Vissza</a>
+</div>
+    }
 }
-    </tbody>
-</table>

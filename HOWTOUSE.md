@@ -8,14 +8,12 @@
 
 ### Diákok:
 
-- Regisztrálni kizárólag a diákoknak kell.
 - Regisztrálásnál a valódi neveteket használjátok, hogy tanárotok rátok ismerjen!
 - Ehhez nem szükséges e-mail cím vagy telefonszám.
 
 ### Tanárok:
 
-- Nektek nem kell regisztrálni. :)
-- A tanárok regisztracíó nélkül is megtekinthetik a projekteket.
+- 3.1 töl mér nektek is kell regisztrálni. :(
 </details>
 
 <details>
@@ -29,18 +27,20 @@
 
 - Egy új projektet a _Projektek_ oldalon tudtok létrehozni
   > Ezt a menüt csak bejelentkezés után látod!
-- Egy meglévő projekthez szintén a _Projektek_ oldalon tudtok csatlakozni
-  > Kérjük mindenki csak ahoz a projekthez csatlakozzon ahova be van osztva!
+- Egy meglévő projekthez a projekt létrehozója tud meghívni a *Tagok szerkesztése* gombra kattintva
 - **Figyelem! Egy projekt törlésével az ahoz tartozó összes adat véglegesen törlődik!**
 
 ### Tanárok:
 
-- A diákok projektjeit a _Munkanapló megtekintése tanárként_ menü alatt tudod megnézni
+- Egy projekthez a projekt létrehozója tud meghívni a 3.1-es verzó óta
+- A tanárok nem hozhatnak létre projekteket
 </details>
 
 <details>
 <summary><h2>3. Feladatok</h2></summary>
 <hr>
+
+- **Egy feladatokhoz csak a projekt tagjai férhetnek hozzá**
 
 ### Diákok:
 
@@ -73,6 +73,7 @@
     - Tulajdonos (Akinek a feladat ki lett osztva) 
     - státusz 
     - Befelyező
+- A tanárok nem hozhatnak létre, nem szerkeszthetik és törölhetik a feladatokat
 </details>
 
 <details>
@@ -90,7 +91,11 @@
 
 - Alfeladatokat egy feladat _részletek_ oldaláról hozhattok létre
 - Alfeladatokat egy feladat _szerkesztés_ oldaláról törölhettek.
+
+### Tanárok:
+
+- A tanárok nem hozhatnak létre, nem szerkeszthetik és törölhetik az alfeladatokat
 </details>
 
 
-## Most már mindent tudtok, vissza térhettek a [főoldalra](/README.md):)
+## Most már mindent tudtok, vissza térhettek a [főoldalra](/README.md) :)

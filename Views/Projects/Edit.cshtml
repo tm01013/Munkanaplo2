@@ -15,42 +15,51 @@
     <h1>Szerkesztés</h1>
     <hr />
     <div class="row">
-        <div class="col-md-4">
-            <form asp-action="EditConfirmed">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <input type="hidden" asp-for="Id" />
+    <div class="col-md-4">
+        <form asp-action="EditConfirmed">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
 
-                <div class="form-group">
-                    <label asp-for="ProjectTitle" class="control-label">Cím</label>
-                    <input asp-for="ProjectTitle" class="form-control" />
-                    <span asp-validation-for="ProjectTitle" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <input type="hidden" asp-for="ProjectCreator" class="form-control" value="@Model.ProjectCreator"/>
-                    <span asp-validation-for="ProjectCreator" class="text-danger"></span>
-                </div>
-                <br />
-                <div class="form-group">
-                    <input type="submit" value="Mentés" class="btn btn-primary" />
-                </div>
-            </form>
-        </div>
+            <div class="form-group">
+                <label asp-for="ProjectTitle" class="control-label">Cím</label>
+                <input asp-for="ProjectTitle" class="form-control" />
+                <span asp-validation-for="ProjectTitle" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="hidden" asp-for="ProjectCreator" class="form-control" value="@Model.ProjectCreator" />
+                <span asp-validation-for="ProjectCreator" class="text-danger"></span>
+            </div>
+            <br />
+            <div class="form-group">
+                <input type="submit" value="Mentés" class="btn btn-primary" />
+            </div>
+        </form>
     </div>
+</div>
     <br>
- <div>
-     <a type="button" class="btn btn-primary" asp-action="Index">Vissza</a>
- </div>
+    <div>
+    <a type="button" class="btn btn-primary" asp-action="Index">Vissza</a>
+</div>
 }
-@if(SignInManager.IsSignedIn(User) && User.Identity?.Name != Model.ProjectCreator)
+@if (SignInManager.IsSignedIn(User) && User.Identity?.Name != Model.ProjectCreator)
 {
     <br />
     <br />
-    <h3>Hiba!</h3>
-    <h4>Ezt a projektet csak @canEdit szerkesztheti.</h4>
+    <div class="text-center">
+    <h1 class="display-4">HIBA!</h1>
+    <br>
+    <p><strong>Ehhez nincs jogosultságod! ｡°(°.◜ᯅ◝°)°｡</strong></p>
+    <p>Csak akkor tudod szerkeszteni ha ennek a projektnet tagja vagy.</p>
+    <br>
+    <a>Ha úgy gondolod ,hogy a programmal van a gond jelensd </a><a
+        href="https://github.com/tm01013/Munkanaplo2.git">itt</a>
     <br />
     <a type="button" class="btn btn-primary" asp-action="Index">Vissza</a>
+</div>
 }
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
