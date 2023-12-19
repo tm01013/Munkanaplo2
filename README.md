@@ -31,7 +31,7 @@ Egy nyílt forráskódú munkanaplo vezetését megkönnyítő alkalmazás
 
 1. Adatbázis kimásolása a régi konténerből
     ```bash
-    sudo docker cp <régi konténer neve>:/app.db ~/app.db
+    sudo docker cp <régi konténer neve>:/app/app.db ~/app.db
     ```
 2. Régi konténer törlése
     ```bash
@@ -44,7 +44,7 @@ Egy nyílt forráskódú munkanaplo vezetését megkönnyítő alkalmazás
     ```
 4. Adatbázis bemásolása az új konténerbe
     ```bash
-    sudo docker cp ~/app.db Munkanaplo:/app.db
+    sudo docker cp ~/app.db Munkanaplo:/app/app.db
     ```
 
 </details>
