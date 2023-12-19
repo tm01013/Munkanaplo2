@@ -166,12 +166,12 @@
             <br><span class="ms-3 text-muted">© Tatár Márton - @DateTime.Now.ToString("yyyy") - <a asp-controller="Home"
                     asp-action="Privacy">Használati feltételek</a></span>
         </div>
-        <div class="col-md-4 d-flex d-inline align-items-center justify-content-center">
-            @if (UpdateAvailable)
-            {
+        @if (UpdateAvailable)
+        {
+            <div class="col-md-4 d-flex d-inline align-items-center justify-content-center">
                 <span class="text-muted">Új verzió érhető el! ◝(ᵔᗜᵔ)◜</span>
-            }
-        </div>
+            </div>
+        }
         <div class="me-3 col-md-4 d-flex d-inline align-items-center justify-content-end">
             <span class="text-muted">Munkanapló v3.1 - 2023.12.19</span>
         </div>
