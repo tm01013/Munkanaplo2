@@ -7,6 +7,7 @@
 @{
 
     bool UpdateAvailable = false;
+    string currentVersionNumber = "3.1.0";
     using (var client = new HttpClient())
     {
         // Make the HTTP GET request
@@ -20,7 +21,7 @@
             string content = await response.Content.ReadAsStringAsync();
 
             // Process the content as needed
-            string currentVersionNumber = "3.1.0"; // Replace with the actual current version number
+            
             if (IsNewerVersion(content, currentVersionNumber))
             {
                 UpdateAvailable = true;
@@ -123,32 +124,14 @@
                         }
                         @if (SignInManager.IsSignedIn(User))
                         {
-                            List<ProjectModel> allProjects = projectService.GetProjectsAsync();
-                            List<ProjectModel> projects = new List<ProjectModel>();
-                            if (allProjects != null)
+                            @foreach (ProjectModel project in projectService.GetMyProjects(User.Identity.Name))
                             {
-                                foreach (ProjectModel projectModel in allProjects)
-                                {
-                                    List<ProjectMembership> allMemberships = projectModel.ProjectMembers?.ToList();
-                                    if (allMemberships != null)
-                                    {
-                                        bool isImIn = false;
-                                        foreach (ProjectMembership membership in allMemberships)
-                                        {
-                                            if (membership.Member == User?.Identity?.Name?.ToString()) isImIn = true;
-                                        }
-
-                                        if (isImIn) projects.Add(projectModel);
-                                        foreach (ProjectModel item in projects)
-                                        {
-                                            <li class="nav-item">
-                                                <a class="nav-link text-light" asp-area="" asp-controller="Jobs" asp-route-id="@item.Id"
-                                                    asp-action="Index">@item.ProjectTitle</a>
-                                            </li>
-                                        }
-                                    }
-                                }
+                                <li class="nav-item">
+                                    <a class="nav-link text-light" asp-area="" asp-controller="Jobs" asp-route-id="@project.Id"
+                                        asp-action="Index">@project.ProjectTitle</a>
+                                </li>
                             }
+                                            
                         }
                     </ul>
                     <partial name="_LoginPartial" />
@@ -173,7 +156,7 @@
             </div>
         }
         <div class="me-3 col-md-4 d-flex d-inline align-items-center justify-content-end">
-            <span class="text-muted">Munkanapló v3.1 - 2023.12.19</span>
+            <span class="text-muted">Munkanapló v@(currentVersionNumber) - 2023.12.19</span>
         </div>
     </footer>
     <script>

@@ -9,5 +9,6 @@ namespace Munkanaplo2.Services
     {
         List<ProjectModel> GetProjectsAsync();
         List<string> GetProjectMembers(int id);
+        List<ProjectModel> GetMyProjects(string user);
     }
 }

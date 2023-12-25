@@ -15,6 +15,20 @@ namespace Munkanaplo2.Services
             _context = context;
         }
 
+        public List<ProjectModel> GetMyProjects(string user)
+        {
+            List<ProjectModel> allProjects = _context.ProjectModel.Include(pm => pm.ProjectMembers).ToList();
+            List<ProjectModel> myProjects = new List<ProjectModel>();
+            foreach (ProjectModel project in allProjects)
+            {
+                if (project.ProjectMembers.Where(pm => pm.Member == user).Any())
+                {
+                    myProjects.Add(project);
+                }
+            }
+            return myProjects;
+        }
+
         public List<string> GetProjectMembers(int id)
         {
             List<string> members = new List<string>();
